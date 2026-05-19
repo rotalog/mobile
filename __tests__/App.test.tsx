@@ -2,49 +2,37 @@ import React from 'react';
 import ReactTestRenderer, { act } from 'react-test-renderer';
 
 jest.mock(
-  'expo-status-bar',
+  '@react-native/new-app-screen',
   () => {
     const ReactNative = require('react-native');
 
     return {
-      StatusBar: () => <ReactNative.Text>MockStatusBar</ReactNative.Text>,
+      NewAppScreen: ({ templateFileName }: { templateFileName: string }) => (
+        <ReactNative.Text>{`MockScreen:${templateFileName}`}</ReactNative.Text>
+      ),
     };
   },
-  { virtual: true },
 );
 
 jest.mock(
-  '../src/context/AuthContext',
-  () => ({
-    AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  }),
-  { virtual: true },
-);
-
-jest.mock(
-  '../src/context/CartContext',
-  () => ({
-    CartProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  }),
-  { virtual: true },
-);
-
-jest.mock(
-  '../src/navigation/AppNavigator',
+  'react-native-safe-area-context',
   () => {
-    const ReactNative = require('react-native');
-
     return {
-      AppNavigator: () => <ReactNative.Text>MockNavigator</ReactNative.Text>,
+      SafeAreaProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      useSafeAreaInsets: () => ({
+        top: 1,
+        right: 2,
+        bottom: 3,
+        left: 4,
+      }),
     };
   },
-  { virtual: true },
 );
 
-import App from '../App';
+import App from '../src/App';
 
 describe('App bootstrap', () => {
-  test('renders the Expo root app without crashing', async () => {
+  test('renders the React Native root app without crashing', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
 
     await act(async () => {
@@ -52,7 +40,6 @@ describe('App bootstrap', () => {
     });
 
     expect(renderer).toBeDefined();
-    expect(renderer!.root.findByProps({ children: 'MockStatusBar' })).toBeTruthy();
-    expect(renderer!.root.findByProps({ children: 'MockNavigator' })).toBeTruthy();
+    expect(renderer!.root.findByProps({ children: 'MockScreen:App.tsx' })).toBeTruthy();
   });
 });
