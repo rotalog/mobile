@@ -1,13 +1,18 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
 import { PEDIDOS } from '../../data/mock';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { FontSize, Radius, Spacing } from '../../theme';
 
-const STATUS_COLOR: Record<string, string> = { entregue: Colors.green, cancelado: Colors.danger, pendente: Colors.warning };
-const STATUS_ICON:  Record<string, string> = { entregue: '✓', cancelado: '✕', pendente: '⏱' };
+const STATUS_ICON: Record<string, string> = { entregue: '✓', cancelado: '✕', pendente: '⏱' };
 
 export function HistoryScreen({ navigation }: { navigation: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+  const STATUS_COLOR: Record<string, string> = { entregue: colors.green, cancelado: colors.danger, pendente: colors.warning };
+
   return (
     <View style={s.container}>
       <TopBar title="Histórico de Pedidos" onBack={() => navigation.goBack()} />
@@ -42,18 +47,18 @@ export function HistoryScreen({ navigation }: { navigation: any }) {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   list:      { padding: Spacing.xl, gap: 12 },
-  card:      { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
+  card:      { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border },
   top:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  id:        { fontWeight: '800', color: Colors.text, fontSize: FontSize.base },
+  id:        { fontWeight: '800', color: c.text, fontSize: FontSize.base },
   badge:     { borderRadius: Radius.full, paddingHorizontal: 10, paddingVertical: 3 },
   badgeTxt:  { fontSize: FontSize.xs, fontWeight: '700' },
-  meta:      { color: Colors.muted, fontSize: FontSize.sm },
-  itens:     { color: Colors.muted, fontSize: FontSize.xs, marginBottom: 12 },
+  meta:      { color: c.muted, fontSize: FontSize.sm },
+  itens:     { color: c.muted, fontSize: FontSize.xs, marginBottom: 12 },
   footer:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  total:     { color: Colors.green, fontWeight: '800', fontSize: FontSize.base },
-  repeatBtn: { backgroundColor: `${Colors.green}22`, borderWidth: 1, borderColor: `${Colors.green}44`, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 6 },
-  repeatTxt: { color: Colors.green, fontWeight: '700', fontSize: FontSize.xs },
+  total:     { color: c.green, fontWeight: '800', fontSize: FontSize.base },
+  repeatBtn: { backgroundColor: `${c.green}22`, borderWidth: 1, borderColor: `${c.green}44`, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 6 },
+  repeatTxt: { color: c.green, fontWeight: '700', fontSize: FontSize.xs },
 });

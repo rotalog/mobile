@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
@@ -17,6 +19,9 @@ const RESUMO = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DriverSummaryScreen({ navigation }: { navigation: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const taxaSucesso = Math.round((RESUMO.entregasRealizadas / RESUMO.totalEntregas) * 100);
 
   const handleEncerrar = async () => {
@@ -67,7 +72,7 @@ export function DriverSummaryScreen({ navigation }: { navigation: any }) {
           </View>
           <View style={s.metricaCard}>
             <Text style={{ fontSize: 24 }}>✅</Text>
-            <Text style={[s.metricaVal, { color: taxaSucesso === 100 ? Colors.green : Colors.warning }]}>
+            <Text style={[s.metricaVal, { color: taxaSucesso === 100 ? colors.green : colors.warning }]}>
               {taxaSucesso}%
             </Text>
             <Text style={s.metricaLabel}>Taxa de Sucesso</Text>
@@ -107,33 +112,33 @@ export function DriverSummaryScreen({ navigation }: { navigation: any }) {
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  container:      { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:      { flex: 1, backgroundColor: c.bg },
   list:           { padding: Spacing.xl, gap: 14 },
-  sectionLabel:   { fontSize: FontSize.xs, fontWeight: '700', color: Colors.green, letterSpacing: 1.2 },
+  sectionLabel:   { fontSize: FontSize.xs, fontWeight: '700', color: c.green, letterSpacing: 1.2 },
 
   successWrap:    { alignItems: 'center', gap: 10, paddingVertical: Spacing.lg },
-  successIcon:    { width: 80, height: 80, borderRadius: 40, backgroundColor: `${Colors.green}22`, borderWidth: 2, borderColor: Colors.green, alignItems: 'center', justifyContent: 'center' },
-  successTitle:   { color: Colors.text, fontWeight: '800', fontSize: FontSize.lg, textAlign: 'center' },
-  successSub:     { color: Colors.muted, fontSize: FontSize.sm, textAlign: 'center', lineHeight: 22 },
+  successIcon:    { width: 80, height: 80, borderRadius: 40, backgroundColor: `${c.green}22`, borderWidth: 2, borderColor: c.green, alignItems: 'center', justifyContent: 'center' },
+  successTitle:   { color: c.text, fontWeight: '800', fontSize: FontSize.lg, textAlign: 'center' },
+  successSub:     { color: c.muted, fontSize: FontSize.sm, textAlign: 'center', lineHeight: 22 },
 
-  card:           { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, gap: 8 },
-  percursoLabel:  { color: Colors.muted, fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 1 },
-  percursoVal:    { color: Colors.text, fontWeight: '800', fontSize: FontSize.xl },
+  card:           { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border, gap: 8 },
+  percursoLabel:  { color: c.muted, fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 1 },
+  percursoVal:    { color: c.text, fontWeight: '800', fontSize: FontSize.xl },
 
   metricasGrid:   { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  metricaCard:    { flex: 1, minWidth: '45%', backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', gap: 6 },
-  metricaVal:     { color: Colors.green, fontWeight: '900', fontSize: FontSize.lg },
-  metricaLabel:   { color: Colors.muted, fontSize: FontSize.xs },
+  metricaCard:    { flex: 1, minWidth: '45%', backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border, alignItems: 'center', gap: 6 },
+  metricaVal:     { color: c.green, fontWeight: '900', fontSize: FontSize.lg },
+  metricaLabel:   { color: c.muted, fontSize: FontSize.xs },
 
   progressRow:    { flexDirection: 'row', justifyContent: 'space-between' },
-  progressLabel:  { color: Colors.muted, fontSize: FontSize.sm },
-  progressVal:    { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm },
-  progressBar:    { height: 8, backgroundColor: Colors.subtle, borderRadius: 4, overflow: 'hidden' },
-  progressFill:   { height: '100%', backgroundColor: Colors.green, borderRadius: 4 },
-  falhasLabel:    { color: Colors.danger, fontSize: FontSize.xs },
+  progressLabel:  { color: c.muted, fontSize: FontSize.sm },
+  progressVal:    { color: c.text, fontWeight: '700', fontSize: FontSize.sm },
+  progressBar:    { height: 8, backgroundColor: c.subtle, borderRadius: 4, overflow: 'hidden' },
+  progressFill:   { height: '100%', backgroundColor: c.green, borderRadius: 4 },
+  falhasLabel:    { color: c.danger, fontSize: FontSize.xs },
 
-  verDetalhes:    { color: Colors.green, fontSize: FontSize.sm, fontWeight: '700', textAlign: 'center' },
+  verDetalhes:    { color: c.green, fontSize: FontSize.sm, fontWeight: '700', textAlign: 'center' },
 
-  footer:         { padding: Spacing.xl, borderTopWidth: 1, borderTopColor: Colors.border, backgroundColor: Colors.surface },
+  footer:         { padding: Spacing.xl, borderTopWidth: 1, borderTopColor: c.border, backgroundColor: c.surface },
 });

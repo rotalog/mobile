@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
@@ -8,6 +10,9 @@ import { Colors, FontSize, Radius, Spacing } from '../../theme';
 interface Props { navigation: any; route: any; addToCart: (p: Produto) => void; }
 
 export function SupplierScreen({ navigation, route, addToCart }: Props) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const f: Fornecedor = route?.params?.fornecedor ?? FORNECEDORES[0];
   const produtos = PRODUTOS.slice(0, 4);
 
@@ -29,7 +34,7 @@ export function SupplierScreen({ navigation, route, addToCart }: Props) {
             ))}
           </View>
           <View style={s.etaBadge}>
-            <Text style={s.etaTxt}>🕐 Entrega estimada: <Text style={{ color: Colors.text, fontWeight: '700' }}>{f.tempo}</Text></Text>
+            <Text style={s.etaTxt}>🕐 Entrega estimada: <Text style={{ color: colors.text, fontWeight: '700' }}>{f.tempo}</Text></Text>
           </View>
         </View>
 
@@ -50,20 +55,20 @@ export function SupplierScreen({ navigation, route, addToCart }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   scroll:    { padding: Spacing.xl, gap: 16 },
   hero:      { alignItems: 'center', borderRadius: Radius.xl, padding: Spacing.xl },
-  name:      { color: Colors.text, fontSize: FontSize.xl, fontWeight: '900', marginBottom: 4 },
-  cat:       { color: Colors.muted, marginBottom: 12 },
+  name:      { color: c.text, fontSize: FontSize.xl, fontWeight: '900', marginBottom: 4 },
+  cat:       { color: c.muted, marginBottom: 12 },
   stats:     { flexDirection: 'row', gap: 32, marginBottom: 12 },
-  statVal:   { color: Colors.green, fontWeight: '900', fontSize: FontSize.lg, textAlign: 'center' },
-  statKey:   { color: Colors.muted, fontSize: FontSize.xs },
-  etaBadge:  { backgroundColor: Colors.card, borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: 10, borderWidth: 1, borderColor: Colors.border },
-  etaTxt:    { color: Colors.muted, fontSize: FontSize.sm },
-  section:   { color: Colors.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
+  statVal:   { color: c.green, fontWeight: '900', fontSize: FontSize.lg, textAlign: 'center' },
+  statKey:   { color: c.muted, fontSize: FontSize.xs },
+  etaBadge:  { backgroundColor: c.card, borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: 10, borderWidth: 1, borderColor: c.border },
+  etaTxt:    { color: c.muted, fontSize: FontSize.sm },
+  section:   { color: c.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
   grid:      { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  prodCard:  { flex: 1, minWidth: '45%', backgroundColor: Colors.card, borderRadius: Radius.md, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  prodName:  { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 4 },
-  prodPrice: { color: Colors.green, fontWeight: '800', fontSize: FontSize.sm },
+  prodCard:  { flex: 1, minWidth: '45%', backgroundColor: c.card, borderRadius: Radius.md, padding: Spacing.md, borderWidth: 1, borderColor: c.border },
+  prodName:  { color: c.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 4 },
+  prodPrice: { color: c.green, fontWeight: '800', fontSize: FontSize.sm },
 });

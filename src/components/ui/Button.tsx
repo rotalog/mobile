@@ -1,6 +1,8 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { TouchableOpacity, Text, ActivityIndicator, ViewStyle } from 'react-native';
+import { FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemedStyles } from '../../hooks/useThemedStyles';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -15,14 +17,17 @@ interface ButtonProps {
   style?: ViewStyle;
 }
 
-const variantStyles = {
-  primary:   { bg: Colors.green,   text: '#0A0C0E', border: Colors.green   },
-  secondary: { bg: 'transparent',  text: Colors.green, border: Colors.green },
-  ghost:     { bg: Colors.subtle,  text: Colors.text,  border: Colors.subtle},
-  danger:    { bg: Colors.danger,  text: '#fff',    border: Colors.danger   },
-};
-
 export function Button({ label, onPress, variant = 'primary', full, sm, loading, disabled, style }: ButtonProps) {
+  const styles = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
+  const variantStyles = {
+    primary:   { bg: colors.green,   text: colors.onPrimary, border: colors.green },
+    secondary: { bg: 'transparent',  text: colors.green,     border: colors.green },
+    ghost:     { bg: colors.subtle,  text: colors.text,      border: colors.subtle },
+    danger:    { bg: colors.danger,  text: '#fff',           border: colors.danger },
+  };
+
   const v = variantStyles[variant];
   const isDisabled = disabled || loading;
 
@@ -33,7 +38,7 @@ export function Button({ label, onPress, variant = 'primary', full, sm, loading,
       activeOpacity={0.75}
       style={[
         styles.base,
-        { backgroundColor: isDisabled ? Colors.subtle : v.bg, borderColor: v.border },
+        { backgroundColor: isDisabled ? colors.subtle : v.bg, borderColor: v.border },
         full && styles.full,
         sm && styles.sm,
         style,
@@ -41,13 +46,13 @@ export function Button({ label, onPress, variant = 'primary', full, sm, loading,
     >
       {loading
         ? <ActivityIndicator color={v.text} size="small" />
-        : <Text style={[styles.label, { color: isDisabled ? Colors.muted : v.text }, sm && styles.labelSm]}>{label}</Text>
+        : <Text style={[styles.label, { color: isDisabled ? colors.muted : v.text }, sm && styles.labelSm]}>{label}</Text>
       }
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
   base:    { borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   full:    { width: '100%' },
   sm:      { paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md },

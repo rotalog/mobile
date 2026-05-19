@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
@@ -23,6 +25,9 @@ interface Endereco {
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 export function ProfileScreen({ navigation }: { navigation: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   // Dados pessoais
   const { user } = useAuth();
 const [editing, setEditing]   = useState(false);
@@ -169,37 +174,37 @@ const [telefone, setTelefone] = useState(user?.telefone ?? '');
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  container:         { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:         { flex: 1, backgroundColor: c.bg },
   list:              { padding: Spacing.xl, gap: 10 },
 
   avatarWrap:        { alignItems: 'center', marginBottom: 8 },
-  name:              { color: Colors.text, fontWeight: '800', fontSize: FontSize.xl, marginTop: 12 },
-  since:             { color: Colors.muted, fontSize: FontSize.sm },
+  name:              { color: c.text, fontWeight: '800', fontSize: FontSize.xl, marginTop: 12 },
+  since:             { color: c.muted, fontSize: FontSize.sm },
 
-  editBtn:           { backgroundColor: `${Colors.green}22`, borderWidth: 1, borderColor: `${Colors.green}44`, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 },
-  editBtnTxt:        { color: Colors.green, fontWeight: '800', fontSize: FontSize.xs },
+  editBtn:           { backgroundColor: `${c.green}22`, borderWidth: 1, borderColor: `${c.green}44`, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 },
+  editBtnTxt:        { color: c.green, fontWeight: '800', fontSize: FontSize.xs },
 
-  section:           { color: Colors.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
-  inputLabel:        { color: Colors.muted, fontSize: FontSize.xs, fontWeight: '700', marginBottom: 4, marginTop: 4 },
+  section:           { color: c.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
+  inputLabel:        { color: c.muted, fontSize: FontSize.xs, fontWeight: '700', marginBottom: 4, marginTop: 4 },
 
-  dataCard:          { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, gap: 4 },
-  dataRow:           { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  dataKey:           { color: Colors.muted, fontSize: FontSize.sm },
-  dataVal:           { color: Colors.text, fontWeight: '600', fontSize: FontSize.sm },
+  dataCard:          { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border, gap: 4 },
+  dataRow:           { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: c.border },
+  dataKey:           { color: c.muted, fontSize: FontSize.sm },
+  dataVal:           { color: c.text, fontWeight: '600', fontSize: FontSize.sm },
 
   addrHeader:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  addBtn:            { backgroundColor: Colors.green, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4 },
-  addrCard:          { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  addrCardPrincipal: { borderColor: Colors.green },
+  addBtn:            { backgroundColor: c.green, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4 },
+  addrCard:          { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border },
+  addrCardPrincipal: { borderColor: c.green },
   addrTop:           { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  addrLabel:         { fontWeight: '800', color: Colors.text, fontSize: FontSize.base },
-  addrRua:           { color: Colors.muted, fontSize: FontSize.sm },
-  addrSub:           { color: Colors.muted, fontSize: FontSize.xs },
-  addrAction:        { color: Colors.green, fontSize: FontSize.xs, marginTop: 6, fontWeight: '600' },
+  addrLabel:         { fontWeight: '800', color: c.text, fontSize: FontSize.base },
+  addrRua:           { color: c.muted, fontSize: FontSize.sm },
+  addrSub:           { color: c.muted, fontSize: FontSize.xs },
+  addrAction:        { color: c.green, fontSize: FontSize.xs, marginTop: 6, fontWeight: '600' },
 
   modalOverlay:      { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  modalCard:         { backgroundColor: Colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.xl, gap: 4 },
-  modalTitle:        { color: Colors.text, fontWeight: '800', fontSize: FontSize.lg, marginBottom: 8 },
+  modalCard:         { backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.xl, gap: 4 },
+  modalTitle:        { color: c.text, fontWeight: '800', fontSize: FontSize.lg, marginBottom: 8 },
   modalBtns:         { flexDirection: 'row', gap: 12, marginTop: 8 },
 });

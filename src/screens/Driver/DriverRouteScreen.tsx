@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -5,7 +7,7 @@ import * as Location from 'expo-location';
 import { Client } from '@stomp/stompjs';
 import { TopBar } from '../../components/layout/TopBar';
 import { Button } from '../../components/ui/Button';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { FontSize, Radius, Spacing } from '../../theme';
 import { api } from '../../services/api';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -34,15 +36,18 @@ const STATUS_LABEL: Record<string, string> = {
   FAILED:    'Falhou',
 };
 
-const STATUS_COLOR: Record<string, string> = {
-  PENDING:   Colors.warning,
-  ARRIVED:   Colors.green,
-  DELIVERED: Colors.green,
-  FAILED:    Colors.danger,
-};
-
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DriverRouteScreen({ navigation }: { navigation: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
+  const STATUS_COLOR: Record<string, string> = {
+    PENDING:   colors.warning,
+    ARRIVED:   colors.green,
+    DELIVERED: colors.green,
+    FAILED:    colors.danger,
+  };
+
   const [rota, setRota]         = useState<Rota | null>(null);
   const [pontos, setPontos]     = useState<Ponto[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -183,7 +188,7 @@ export function DriverRouteScreen({ navigation }: { navigation: any }) {
       <View style={s.container}>
         <TopBar title="Minha Rota" />
         <View style={s.center}>
-          <ActivityIndicator color={Colors.green} size="large" />
+          <ActivityIndicator color={colors.green} size="large" />
           <Text style={s.loadingTxt}>Carregando rota do dia...</Text>
         </View>
       </View>
@@ -226,7 +231,7 @@ export function DriverRouteScreen({ navigation }: { navigation: any }) {
   {/* O Polyline desenha a linha ligando os pontos */}
   <Polyline 
     coordinates={pontos.map(p => ({ latitude: p.lat, longitude: p.lng }))} 
-    strokeColor={Colors.green} 
+    strokeColor={colors.green} 
     strokeWidth={3} 
   />
 
@@ -307,34 +312,34 @@ export function DriverRouteScreen({ navigation }: { navigation: any }) {
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:       { flex: 1, backgroundColor: c.bg },
   center:          { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  loadingTxt:      { color: Colors.muted, fontSize: FontSize.sm, marginTop: 8 },
-  erroTxt:         { color: Colors.muted, fontSize: FontSize.base, textAlign: 'center', paddingHorizontal: 32 },
+  loadingTxt:      { color: c.muted, fontSize: FontSize.sm, marginTop: 8 },
+  erroTxt:         { color: c.muted, fontSize: FontSize.base, textAlign: 'center', paddingHorizontal: 32 },
 
-  map:             { height: 220, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  markerWrap:      { width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.green, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#0A0C0E' },
+  map:             { height: 220, borderBottomWidth: 1, borderBottomColor: c.border },
+  markerWrap:      { width: 28, height: 28, borderRadius: 14, backgroundColor: c.green, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#0A0C0E' },
   markerTxt:       { color: '#0A0C0E', fontWeight: '900', fontSize: FontSize.xs },
 
-  gpsBadge:        { backgroundColor: `${Colors.green}22`, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: `${Colors.green}44` },
-  gpsTxt:          { color: Colors.green, fontSize: FontSize.xs, fontWeight: '700' },
+  gpsBadge:        { backgroundColor: `${c.green}22`, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: `${c.green}44` },
+  gpsTxt:          { color: c.green, fontSize: FontSize.xs, fontWeight: '700' },
 
-  rotaInfo:        { flexDirection: 'row', backgroundColor: Colors.surface, borderBottomWidth: 1, borderBottomColor: Colors.border, paddingVertical: Spacing.md },
+  rotaInfo:        { flexDirection: 'row', backgroundColor: c.surface, borderBottomWidth: 1, borderBottomColor: c.border, paddingVertical: Spacing.md },
   rotaInfoItem:    { flex: 1, alignItems: 'center' },
-  rotaInfoVal:     { color: Colors.green, fontWeight: '800', fontSize: FontSize.base },
-  rotaInfoLabel:   { color: Colors.muted, fontSize: FontSize.xs, marginTop: 2 },
-  rotaInfoDivider: { width: 1, backgroundColor: Colors.border },
+  rotaInfoVal:     { color: c.green, fontWeight: '800', fontSize: FontSize.base },
+  rotaInfoLabel:   { color: c.muted, fontSize: FontSize.xs, marginTop: 2 },
+  rotaInfoDivider: { width: 1, backgroundColor: c.border },
 
   list:            { padding: Spacing.xl, gap: 10 },
-  card:            { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  cardNum:         { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.green, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  card:            { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardNum:         { width: 32, height: 32, borderRadius: 16, backgroundColor: c.green, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   cardNumTxt:      { color: '#0A0C0E', fontWeight: '900', fontSize: FontSize.sm },
   cardInfo:        { flex: 1 },
-  cardNome:        { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm },
-  cardEndereco:    { color: Colors.muted, fontSize: FontSize.xs, marginTop: 2 },
+  cardNome:        { color: c.text, fontWeight: '700', fontSize: FontSize.sm },
+  cardEndereco:    { color: c.muted, fontSize: FontSize.xs, marginTop: 2 },
   statusBadge:     { borderRadius: Radius.full, paddingHorizontal: 8, paddingVertical: 3 },
   statusTxt:       { fontSize: FontSize.xs, fontWeight: '700' },
 
-  footer:          { padding: Spacing.xl, borderTopWidth: 1, borderTopColor: Colors.border, backgroundColor: Colors.surface },
+  footer:          { padding: Spacing.xl, borderTopWidth: 1, borderTopColor: c.border, backgroundColor: c.surface },
 });

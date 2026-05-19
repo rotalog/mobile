@@ -1,4 +1,21 @@
-export const Colors = {
+export type ColorPalette = {
+  bg: string;
+  surface: string;
+  card: string;
+  border: string;
+  green: string;
+  greenDim: string;
+  greenGlow: string;
+  text: string;
+  muted: string;
+  subtle: string;
+  danger: string;
+  warning: string;
+  overlay: string;
+  onPrimary: string;
+};
+
+export const darkColors: ColorPalette = {
   bg:        '#0A0C0E',
   surface:   '#111416',
   card:      '#181C1F',
@@ -12,7 +29,28 @@ export const Colors = {
   danger:    '#FF4D4D',
   warning:   '#FFB300',
   overlay:   'rgba(10,12,14,0.92)',
-} as const;
+  onPrimary: '#0A0C0E',
+};
+
+export const lightColors: ColorPalette = {
+  bg:        '#F2F5F8',
+  surface:   '#FFFFFF',
+  card:      '#FFFFFF',
+  border:    '#D8E0E8',
+  green:     '#00B85A',
+  greenDim:  '#00964D',
+  greenGlow: 'rgba(0,184,90,0.12)',
+  text:      '#1A2332',
+  muted:     '#5C6B7A',
+  subtle:    '#E8EDF2',
+  danger:    '#E53935',
+  warning:   '#E6A200',
+  overlay:   'rgba(242,245,248,0.92)',
+  onPrimary: '#0A0C0E',
+};
+
+/** @deprecated Use useTheme().colors — kept for non-UI code */
+export const Colors = darkColors;
 
 export const FontSize = {
   xs:   11,

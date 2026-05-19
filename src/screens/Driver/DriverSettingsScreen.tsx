@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
 import { Avatar, Badge } from '../../components/ui/index';
 import { Button } from '../../components/ui/Button';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { FontSize, Radius, Spacing } from '../../theme';
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import * as Location from 'expo-location';
-import { Alert, Switch } from 'react-native';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DriverSettingsScreen({ navigation }: { navigation: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors, isDark, setDarkMode } = useTheme();
+
   const { user, logout } = useAuth();
 
   const nome  = user?.name ?? 'Entregador';
@@ -18,11 +22,11 @@ export function DriverSettingsScreen({ navigation }: { navigation: any }) {
   const [notif, setNotif] = useState(true);
 const [loc, setLoc]     = useState(false);
 
-React.useEffect(() => {
-  Location.getForegroundPermissionsAsync().then(({ status }) => {
-    setLoc(status === 'granted');
-  });
-}, []);
+  useEffect(() => {
+    Location.getForegroundPermissionsAsync().then(({ status }) => {
+      setLoc(status === 'granted');
+    });
+  }, []);
 
 const handleLocToggle = async () => {
   if (loc) {
@@ -52,7 +56,7 @@ const handleLocToggle = async () => {
           <Avatar size={80} letter={nome.charAt(0)} />
           <Text style={s.nome}>{nome}</Text>
           <Text style={s.email}>{email}</Text>
-          <Badge label="Entregador" color={Colors.green} />
+          <Badge label="Entregador" color={colors.green} />
         </View>
 
         {/* Stats do dia */}
@@ -80,7 +84,7 @@ const handleLocToggle = async () => {
         <Row icon="📞" label="Contato"       onPress={() => navigation.navigate('Contact')} />
           <Row icon="🔔" label="Notificações"  toggle={() => setNotif(v => !v)} toggled={notif} />
         <Row icon="📍" label="Localização" toggle={handleLocToggle} toggled={loc} />
-        <Row icon="🌙" label="Tema escuro"        toggle={() => {}}               toggled={true}  />
+        <Row icon={isDark ? '🌙' : '☀️'} label="Tema escuro" toggle={() => setDarkMode(!isDark)} toggled={isDark} />
 
         </View>
 
@@ -111,6 +115,8 @@ function Row({
   toggle?: () => void;
   toggled?: boolean;
 }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
   const action = onPress ?? toggle;
 
   return (
@@ -120,32 +126,37 @@ function Row({
       </View>
       <Text style={s.rowLabel}>{label}</Text>
       {toggle ? (
-        <Switch value={!!toggled} onValueChange={toggle} />
+        <Switch
+          value={!!toggled}
+          onValueChange={toggle}
+          trackColor={{ false: colors.subtle, true: colors.green }}
+          thumbColor="#fff"
+        />
       ) : (
-        <Text style={{ color: Colors.muted, fontSize: 18 }}>›</Text>
+        <Text style={{ color: colors.muted, fontSize: 18 }}>›</Text>
       )}
     </TouchableOpacity>
   );
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:    { flex: 1, backgroundColor: c.bg },
   list:         { padding: Spacing.xl, gap: 14 },
 
   avatarWrap:   { alignItems: 'center', gap: 6, paddingVertical: Spacing.lg },
-  nome:         { color: Colors.text, fontWeight: '800', fontSize: FontSize.xl },
-  email:        { color: Colors.muted, fontSize: FontSize.sm },
+  nome:         { color: c.text, fontWeight: '800', fontSize: FontSize.xl },
+  email:        { color: c.muted, fontSize: FontSize.sm },
 
-  sectionLabel: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.green, letterSpacing: 1.2 },
+  sectionLabel: { fontSize: FontSize.xs, fontWeight: '700', color: c.green, letterSpacing: 1.2 },
 
   statsRow:     { flexDirection: 'row', gap: 10 },
-  statCard:     { flex: 1, backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', gap: 4 },
-  statVal:      { color: Colors.green, fontWeight: '900', fontSize: FontSize.lg },
-  statLabel:    { color: Colors.muted, fontSize: FontSize.xs },
+  statCard:     { flex: 1, backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border, alignItems: 'center', gap: 4 },
+  statVal:      { color: c.green, fontWeight: '900', fontSize: FontSize.lg },
+  statLabel:    { color: c.muted, fontSize: FontSize.xs },
 
-  menuCard:     { backgroundColor: Colors.card, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border },
-  row:          { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  rowIcon:      { width: 36, height: 36, borderRadius: Radius.md, backgroundColor: Colors.subtle, alignItems: 'center', justifyContent: 'center' },
-  rowLabel:     { flex: 1, fontWeight: '700', fontSize: FontSize.base, color: Colors.text },
+  menuCard:     { backgroundColor: c.card, borderRadius: Radius.lg, borderWidth: 1, borderColor: c.border },
+  row:          { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: Spacing.md, borderBottomWidth: 1, borderBottomColor: c.border },
+  rowIcon:      { width: 36, height: 36, borderRadius: Radius.md, backgroundColor: c.subtle, alignItems: 'center', justifyContent: 'center' },
+  rowLabel:     { flex: 1, fontWeight: '700', fontSize: FontSize.base, color: c.text },
 });

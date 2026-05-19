@@ -1,10 +1,11 @@
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Colors, FontSize } from '../theme';
+import { FontSize } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { DriverNavigator } from './DriverNavigator';
@@ -107,6 +108,7 @@ const TABS = [
 ];
 
 function CustomTabBar({ state, navigation }: any) {
+  const tb = useThemedStyles(buildTabStyles);
   const { count } = useCart();
   return (
     <View style={tb.bar}>
@@ -173,12 +175,12 @@ export function AppNavigator() {
   );
 }
 // ── Styles ────────────────────────────────────────────────────────────────────
-const tb = StyleSheet.create({
-  bar:         { flexDirection: 'row', backgroundColor: Colors.surface, borderTopWidth: 1, borderTopColor: Colors.border, paddingBottom: 12, paddingTop: 8 },
+const buildTabStyles = (c: import('../theme').ColorPalette) => ({
+  bar:         { flexDirection: 'row', backgroundColor: c.surface, borderTopWidth: 1, borderTopColor: c.border, paddingBottom: 12, paddingTop: 8 },
   tab:         { flex: 1, alignItems: 'center', gap: 4 },
-  label:       { fontSize: FontSize.xs, color: Colors.muted, fontWeight: '500' },
-  labelActive: { color: Colors.green, fontWeight: '800' },
-  indicator:   { width: 24, height: 3, backgroundColor: Colors.green, borderRadius: 2 },
-  badge:       { position: 'absolute', top: -4, right: -6, backgroundColor: Colors.green, borderRadius: 8, width: 16, height: 16, alignItems: 'center', justifyContent: 'center' },
-  badgeTxt:    { color: '#0A0C0E', fontSize: 9, fontWeight: '900' },
+  label:       { fontSize: FontSize.xs, color: c.muted, fontWeight: '500' },
+  labelActive: { color: c.green, fontWeight: '800' },
+  indicator:   { width: 24, height: 3, backgroundColor: c.green, borderRadius: 2 },
+  badge:       { position: 'absolute', top: -4, right: -6, backgroundColor: c.green, borderRadius: 8, width: 16, height: 16, alignItems: 'center', justifyContent: 'center' },
+  badgeTxt:    { color: c.onPrimary, fontSize: 9, fontWeight: '900' },
 });

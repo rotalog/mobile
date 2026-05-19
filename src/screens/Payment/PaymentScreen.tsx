@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
@@ -17,6 +19,9 @@ const METHODS: { key: PaymentMethod; icon: string; label: string; sub: string }[
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function PaymentScreen({ navigation, route }: { navigation: any; route?: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const total   = route?.params?.total   ?? 0;
   const orderId = route?.params?.orderId ?? '#0000';
 
@@ -192,7 +197,7 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
           </View>
           <View style={[s.detailRow, { borderBottomWidth: 0 }]}>
             <Text style={s.detailLabel}>Total</Text>
-            <Text style={[s.detailValue, { color: Colors.green, fontSize: FontSize.lg }]}>{totalFmt}</Text>
+            <Text style={[s.detailValue, { color: colors.green, fontSize: FontSize.lg }]}>{totalFmt}</Text>
           </View>
         </View>
 
@@ -209,7 +214,7 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
                 <Text style={{ fontSize: 20 }}>{m.icon}</Text>
               </View>
               <View>
-                <Text style={[s.methodTitle, method === m.key && { color: Colors.text }]}>{m.label}</Text>
+                <Text style={[s.methodTitle, method === m.key && { color: colors.text }]}>{m.label}</Text>
                 <Text style={s.methodSub}>{m.sub}</Text>
               </View>
             </View>
@@ -219,7 +224,7 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
           </TouchableOpacity>
         ))}
 
-        <View style={[s.card, { borderColor: `${Colors.green}44` }]}>
+        <View style={[s.card, { borderColor: `${colors.green}44` }]}>
           <Text style={s.infoTitle}>
             {method === 'pix' ? '⚡ Como funciona o Pix' : '🧾 Como funciona o Boleto'}
           </Text>
@@ -249,43 +254,43 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  container:        { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:        { flex: 1, backgroundColor: c.bg },
   list:             { padding: Spacing.xl, gap: 12 },
-  sectionLabel:     { fontSize: FontSize.xs, fontWeight: '700', color: Colors.green, letterSpacing: 1.2, marginBottom: 4, marginTop: 4 },
+  sectionLabel:     { fontSize: FontSize.xs, fontWeight: '700', color: c.green, letterSpacing: 1.2, marginBottom: 4, marginTop: 4 },
 
-  card:             { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  detailRow:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  detailLabel:      { fontSize: FontSize.sm, color: Colors.muted },
-  detailValue:      { fontSize: FontSize.sm, color: Colors.text, fontWeight: '600' },
+  card:             { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border },
+  detailRow:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: c.border },
+  detailLabel:      { fontSize: FontSize.sm, color: c.muted },
+  detailValue:      { fontSize: FontSize.sm, color: c.text, fontWeight: '600' },
 
-  codeBox:          { backgroundColor: Colors.subtle, borderRadius: Radius.md, padding: Spacing.md },
-  codeLabel:        { fontSize: FontSize.xs, color: Colors.muted, marginBottom: 6, fontWeight: '700', letterSpacing: 0.8 },
-  codeValue:        { fontSize: FontSize.xs, color: Colors.green, lineHeight: 18 },
+  codeBox:          { backgroundColor: c.subtle, borderRadius: Radius.md, padding: Spacing.md },
+  codeLabel:        { fontSize: FontSize.xs, color: c.muted, marginBottom: 6, fontWeight: '700', letterSpacing: 0.8 },
+  codeValue:        { fontSize: FontSize.xs, color: c.green, lineHeight: 18 },
 
   methodCard:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  methodCardActive: { borderColor: Colors.green },
+  methodCardActive: { borderColor: c.green },
   methodLeft:       { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  methodIcon:       { width: 44, height: 44, borderRadius: Radius.md, backgroundColor: Colors.subtle, alignItems: 'center', justifyContent: 'center' },
-  methodIconActive: { backgroundColor: `${Colors.green}22` },
-  methodTitle:      { fontSize: FontSize.sm, fontWeight: '600', color: Colors.muted, marginBottom: 2 },
-  methodSub:        { fontSize: FontSize.xs, color: Colors.muted },
-  radio:            { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
-  radioActive:      { borderColor: Colors.green },
-  radioDot:         { width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.green },
+  methodIcon:       { width: 44, height: 44, borderRadius: Radius.md, backgroundColor: c.subtle, alignItems: 'center', justifyContent: 'center' },
+  methodIconActive: { backgroundColor: `${c.green}22` },
+  methodTitle:      { fontSize: FontSize.sm, fontWeight: '600', color: c.muted, marginBottom: 2 },
+  methodSub:        { fontSize: FontSize.xs, color: c.muted },
+  radio:            { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: c.border, alignItems: 'center', justifyContent: 'center' },
+  radioActive:      { borderColor: c.green },
+  radioDot:         { width: 10, height: 10, borderRadius: 5, backgroundColor: c.green },
 
-  infoTitle:        { fontSize: FontSize.sm, fontWeight: '700', color: Colors.green, marginBottom: 6 },
-  infoText:         { fontSize: FontSize.sm, color: Colors.muted, lineHeight: 20 },
+  infoTitle:        { fontSize: FontSize.sm, fontWeight: '700', color: c.green, marginBottom: 6 },
+  infoText:         { fontSize: FontSize.sm, color: c.muted, lineHeight: 20 },
 
-  footer:           { padding: Spacing.xl, borderTopWidth: 1, borderTopColor: Colors.border, backgroundColor: Colors.surface, gap: 12 },
+  footer:           { padding: Spacing.xl, borderTopWidth: 1, borderTopColor: c.border, backgroundColor: c.surface, gap: 12 },
   footerRow:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  footerLabel:      { fontSize: FontSize.sm, color: Colors.muted },
-  footerTotal:      { fontSize: FontSize.xl, color: Colors.text, fontWeight: '900' },
+  footerLabel:      { fontSize: FontSize.sm, color: c.muted },
+  footerTotal:      { fontSize: FontSize.xl, color: c.text, fontWeight: '900' },
 
   successWrapper:   { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.xl, gap: 16 },
-  successTitle:     { fontSize: FontSize.xl, fontWeight: '800', color: Colors.text, textAlign: 'center' },
-  successSub:       { fontSize: FontSize.sm, color: Colors.muted, textAlign: 'center', lineHeight: 22 },
+  successTitle:     { fontSize: FontSize.xl, fontWeight: '800', color: c.text, textAlign: 'center' },
+  successSub:       { fontSize: FontSize.sm, color: c.muted, textAlign: 'center', lineHeight: 22 },
 
-  pollingInfo:      { backgroundColor: `${Colors.green}11`, borderRadius: Radius.md, padding: Spacing.md, borderWidth: 1, borderColor: `${Colors.green}22` },
-  pollingTxt:       { color: Colors.green, fontSize: FontSize.xs, fontWeight: '600', textAlign: 'center' },
+  pollingInfo:      { backgroundColor: `${c.green}11`, borderRadius: Radius.md, padding: Spacing.md, borderWidth: 1, borderColor: `${c.green}22` },
+  pollingTxt:       { color: c.green, fontSize: FontSize.xs, fontWeight: '600', textAlign: 'center' },
 });

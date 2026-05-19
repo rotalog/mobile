@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
@@ -27,6 +29,9 @@ const STEPS = ['Confirmado', 'Em rota', 'Entregue'];
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DeliveryScreen({ navigation }: { navigation: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const [fase, setFase]                   = useState<Fase>(1);
   const [eta, setEta]                     = useState('~18 min');
   const [entregadorPos, setEntregadorPos] = useState<{ lat: number; lng: number } | null>(null);
@@ -118,7 +123,7 @@ export function DeliveryScreen({ navigation }: { navigation: any }) {
       <ScrollView contentContainerStyle={s.list}>
 
         {/* Card do pedido */}
-        <View style={[s.card, { borderColor: `${Colors.green}44` }]}>
+        <View style={[s.card, { borderColor: `${colors.green}44` }]}>
           <View style={s.cardTop}>
             <View>
               <Text style={s.cardId}>{PEDIDO.id}</Text>
@@ -198,7 +203,7 @@ export function DeliveryScreen({ navigation }: { navigation: any }) {
 
         {/* Empty state */}
         <View style={[s.card, { alignItems: 'center' }]}>
-          <Text style={{ color: Colors.muted, fontSize: FontSize.sm, marginBottom: 8 }}>
+          <Text style={{ color: colors.muted, fontSize: FontSize.sm, marginBottom: 8 }}>
             Sem outros pedidos ativos
           </Text>
           <Button label="FAZER PEDIDO" onPress={() => navigation.navigate('HomeTab')} sm />
@@ -210,42 +215,42 @@ export function DeliveryScreen({ navigation }: { navigation: any }) {
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:       { flex: 1, backgroundColor: c.bg },
 
-  map:             { height: 220, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  markerEntregador:{ backgroundColor: Colors.surface, borderRadius: 20, padding: 5, borderWidth: 2, borderColor: Colors.green },
-  markerDestino:   { backgroundColor: Colors.surface, borderRadius: 20, padding: 5, borderWidth: 2, borderColor: Colors.danger },
+  map:             { height: 220, borderBottomWidth: 1, borderBottomColor: c.border },
+  markerEntregador:{ backgroundColor: c.surface, borderRadius: 20, padding: 5, borderWidth: 2, borderColor: c.green },
+  markerDestino:   { backgroundColor: c.surface, borderRadius: 20, padding: 5, borderWidth: 2, borderColor: c.danger },
 
-  mapStatusBar:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.surface, paddingHorizontal: Spacing.xl, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  mapStatusTxt:    { color: Colors.muted, fontSize: FontSize.xs, fontWeight: '600' },
-  etaBar:          { color: Colors.green, fontSize: FontSize.xs, fontWeight: '800' },
+  mapStatusBar:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: c.surface, paddingHorizontal: Spacing.xl, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: c.border },
+  mapStatusTxt:    { color: c.muted, fontSize: FontSize.xs, fontWeight: '600' },
+  etaBar:          { color: c.green, fontSize: FontSize.xs, fontWeight: '800' },
 
   list:            { padding: Spacing.xl, gap: 12 },
-  card:            { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
+  card:            { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border },
   cardTop:         { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
-  cardId:          { fontWeight: '800', color: Colors.text, fontSize: FontSize.base },
-  cardProd:        { color: Colors.muted, fontSize: FontSize.sm },
-  cardSup:         { color: Colors.muted, fontSize: FontSize.xs },
-  eta:             { color: Colors.green, fontWeight: '800', fontSize: FontSize.base, marginTop: 8 },
+  cardId:          { fontWeight: '800', color: c.text, fontSize: FontSize.base },
+  cardProd:        { color: c.muted, fontSize: FontSize.sm },
+  cardSup:         { color: c.muted, fontSize: FontSize.xs },
+  eta:             { color: c.green, fontWeight: '800', fontSize: FontSize.base, marginTop: 8 },
 
-  faseBanner:      { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Colors.subtle, borderRadius: Radius.md, padding: Spacing.md, marginBottom: 16 },
+  faseBanner:      { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.subtle, borderRadius: Radius.md, padding: Spacing.md, marginBottom: 16 },
   faseIcon:        { fontSize: 28 },
-  faseTitle:       { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 2 },
-  faseSub:         { color: Colors.muted, fontSize: FontSize.xs, lineHeight: 18 },
+  faseTitle:       { color: c.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 2 },
+  faseSub:         { color: c.muted, fontSize: FontSize.xs, lineHeight: 18 },
 
   tracker:         { flexDirection: 'row', alignItems: 'center' },
-  dot:             { width: 24, height: 24, borderRadius: 12, backgroundColor: Colors.subtle, alignItems: 'center', justifyContent: 'center' },
-  dotActive:       { backgroundColor: Colors.green },
-  line:            { flex: 1, height: 2, backgroundColor: Colors.border },
-  lineActive:      { backgroundColor: Colors.green },
+  dot:             { width: 24, height: 24, borderRadius: 12, backgroundColor: c.subtle, alignItems: 'center', justifyContent: 'center' },
+  dotActive:       { backgroundColor: c.green },
+  line:            { flex: 1, height: 2, backgroundColor: c.border },
+  lineActive:      { backgroundColor: c.green },
   trackerLabels:   { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
-  trackerLabel:    { color: Colors.muted, fontSize: FontSize.xs },
+  trackerLabel:    { color: c.muted, fontSize: FontSize.xs },
 
-  simLabel:        { color: Colors.muted, fontSize: FontSize.xs, marginBottom: 8 },
+  simLabel:        { color: c.muted, fontSize: FontSize.xs, marginBottom: 8 },
   simRow:          { flexDirection: 'row', gap: 8 },
-  faseBtn:         { flex: 1, padding: Spacing.sm, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border, alignItems: 'center' },
-  faseBtnActive:   { backgroundColor: Colors.green, borderColor: Colors.green },
-  faseBtnTxt:      { color: Colors.muted, fontSize: FontSize.xs, fontWeight: '700' },
+  faseBtn:         { flex: 1, padding: Spacing.sm, borderRadius: Radius.md, borderWidth: 1, borderColor: c.border, alignItems: 'center' },
+  faseBtnActive:   { backgroundColor: c.green, borderColor: c.green },
+  faseBtnTxt:      { color: c.muted, fontSize: FontSize.xs, fontWeight: '700' },
   faseBtnTxtActive:{ color: '#0A0C0E' },
 });

@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
@@ -11,6 +13,9 @@ const CATS = ['Todos', 'Carnes', 'Construção', 'Verduras', 'Grãos', 'Aves', '
 interface Props { navigation: any; addToCart: (p: Produto) => void; }
 
 export function CatalogScreen({ navigation, addToCart }: Props) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const [busca, setBusca] = useState('');
   const [cat, setCat] = useState('Todos');
   const filtrados = PRODUTOS.filter(p =>
@@ -57,18 +62,18 @@ export function CatalogScreen({ navigation, addToCart }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container:     { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:     { flex: 1, backgroundColor: c.bg },
   filters:       { padding: Spacing.xl, paddingBottom: 0 },
-  chip:          { backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 6 },
-  chipActive:    { backgroundColor: Colors.green, borderColor: Colors.green },
-  chipText:      { color: Colors.muted, fontSize: FontSize.xs, fontWeight: '700' },
+  chip:          { backgroundColor: c.card, borderWidth: 1, borderColor: c.border, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 6 },
+  chipActive:    { backgroundColor: c.green, borderColor: c.green },
+  chipText:      { color: c.muted, fontSize: FontSize.xs, fontWeight: '700' },
   chipTextActive:{ color: '#0A0C0E' },
   grid:          { padding: Spacing.xl, gap: 12 },
-  card:          { flex: 1, backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  cardImg:       { alignItems: 'center', backgroundColor: Colors.surface, borderRadius: Radius.md, paddingVertical: 12, marginBottom: 8 },
-  cardName:      { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 2 },
-  cardSup:       { color: Colors.muted, fontSize: FontSize.xs, marginBottom: 6 },
-  cardPrice:     { color: Colors.green, fontWeight: '800', fontSize: FontSize.base },
-  cardUnit:      { color: Colors.muted, fontSize: FontSize.xs },
+  card:          { flex: 1, backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border },
+  cardImg:       { alignItems: 'center', backgroundColor: c.surface, borderRadius: Radius.md, paddingVertical: 12, marginBottom: 8 },
+  cardName:      { color: c.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 2 },
+  cardSup:       { color: c.muted, fontSize: FontSize.xs, marginBottom: 6 },
+  cardPrice:     { color: c.green, fontWeight: '800', fontSize: FontSize.base },
+  cardUnit:      { color: c.muted, fontSize: FontSize.xs },
 });

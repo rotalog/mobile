@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Input } from '../../components/ui/Input';
@@ -7,6 +9,9 @@ import { Colors, FontSize, Radius, Spacing } from '../../theme';
 interface Props { navigation: any; addToCart: (p: Produto) => void; }
 
 export function SearchScreen({ navigation, addToCart }: Props) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const [q, setQ] = useState('');
   const results = PRODUTOS.filter(p => q && p.nome.toLowerCase().includes(q.toLowerCase()));
 
@@ -14,7 +19,7 @@ export function SearchScreen({ navigation, addToCart }: Props) {
     <View style={s.container}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
-          <Text style={{ color: Colors.text, fontSize: 18 }}>←</Text>
+          <Text style={{ color: colors.text, fontSize: 18 }}>←</Text>
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <Input
@@ -65,18 +70,18 @@ export function SearchScreen({ navigation, addToCart }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container:  { flex: 1, backgroundColor: Colors.bg },
-  header:     { padding: Spacing.xl, backgroundColor: Colors.surface, borderBottomWidth: 1, borderBottomColor: Colors.border, flexDirection: 'row', gap: 12, alignItems: 'center' },
-  backBtn:    { backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:  { flex: 1, backgroundColor: c.bg },
+  header:     { padding: Spacing.xl, backgroundColor: c.surface, borderBottomWidth: 1, borderBottomColor: c.border, flexDirection: 'row', gap: 12, alignItems: 'center' },
+  backBtn:    { backgroundColor: c.card, borderWidth: 1, borderColor: c.border, borderRadius: Radius.md, width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
   empty:      { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  emptySub:   { color: Colors.muted, textAlign: 'center' },
+  emptySub:   { color: c.muted, textAlign: 'center' },
   list:       { padding: Spacing.xl, gap: 10 },
-  count:      { color: Colors.muted, fontSize: FontSize.sm, marginBottom: 12 },
-  result:     { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, flexDirection: 'row', gap: 14, alignItems: 'center' },
-  resultIcon: { backgroundColor: Colors.surface, borderRadius: Radius.md, padding: 10 },
-  name:       { color: Colors.text, fontWeight: '700', fontSize: FontSize.base },
-  sup:        { color: Colors.muted, fontSize: FontSize.sm },
-  price:      { color: Colors.green, fontWeight: '800', fontSize: FontSize.base },
-  addBtn:     { backgroundColor: Colors.green, borderRadius: 10, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  count:      { color: c.muted, fontSize: FontSize.sm, marginBottom: 12 },
+  result:     { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border, flexDirection: 'row', gap: 14, alignItems: 'center' },
+  resultIcon: { backgroundColor: c.surface, borderRadius: Radius.md, padding: 10 },
+  name:       { color: c.text, fontWeight: '700', fontSize: FontSize.base },
+  sup:        { color: c.muted, fontSize: FontSize.sm },
+  price:      { color: c.green, fontWeight: '800', fontSize: FontSize.base },
+  addBtn:     { backgroundColor: c.green, borderRadius: 10, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
 });

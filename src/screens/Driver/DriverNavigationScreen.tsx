@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Linking, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
@@ -8,6 +10,9 @@ import { api } from '../../services/api';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DriverNavigationScreen({ navigation, route }: { navigation: any; route: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const ponto = route?.params?.ponto ?? {
     id: '1',
     nome: 'Mariana Silva de Oliveira',
@@ -65,7 +70,7 @@ export function DriverNavigationScreen({ navigation, route }: { navigation: any;
       <ScrollView contentContainerStyle={s.list}>
 
         {/* Info do cliente */}
-        <View style={[s.card, ponto.urgente && { borderColor: Colors.danger }]}>
+        <View style={[s.card, ponto.urgente && { borderColor: colors.danger }]}>
           {ponto.urgente && (
             <View style={s.urgenteBadge}>
               <Text style={s.urgenteTxt}>URGENTE</Text>
@@ -148,31 +153,31 @@ export function DriverNavigationScreen({ navigation, route }: { navigation: any;
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  container:      { flex: 1, backgroundColor: Colors.bg },
-  map:            { height: 220, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  markerDestino:  { backgroundColor: Colors.surface, borderRadius: 20, padding: 4, borderWidth: 2, borderColor: Colors.danger },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:      { flex: 1, backgroundColor: c.bg },
+  map:            { height: 220, borderBottomWidth: 1, borderBottomColor: c.border },
+  markerDestino:  { backgroundColor: c.surface, borderRadius: 20, padding: 4, borderWidth: 2, borderColor: c.danger },
 
   list:           { padding: Spacing.xl, gap: 12 },
-  card:           { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, gap: 12 },
-  sectionLabel:   { fontSize: FontSize.xs, fontWeight: '700', color: Colors.green, letterSpacing: 1.2 },
+  card:           { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border, gap: 12 },
+  sectionLabel:   { fontSize: FontSize.xs, fontWeight: '700', color: c.green, letterSpacing: 1.2 },
 
-  urgenteBadge:   { backgroundColor: `${Colors.danger}22`, borderRadius: Radius.sm, paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start' },
-  urgenteTxt:     { color: Colors.danger, fontSize: FontSize.xs, fontWeight: '900', letterSpacing: 1 },
-  clienteNome:    { color: Colors.text, fontWeight: '800', fontSize: FontSize.lg },
-  clienteEndereco:{ color: Colors.muted, fontSize: FontSize.sm, lineHeight: 20 },
+  urgenteBadge:   { backgroundColor: `${c.danger}22`, borderRadius: Radius.sm, paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start' },
+  urgenteTxt:     { color: c.danger, fontSize: FontSize.xs, fontWeight: '900', letterSpacing: 1 },
+  clienteNome:    { color: c.text, fontWeight: '800', fontSize: FontSize.lg },
+  clienteEndereco:{ color: c.muted, fontSize: FontSize.sm, lineHeight: 20 },
 
-  metaRow:        { flexDirection: 'row', backgroundColor: Colors.subtle, borderRadius: Radius.md, padding: Spacing.md },
+  metaRow:        { flexDirection: 'row', backgroundColor: c.subtle, borderRadius: Radius.md, padding: Spacing.md },
   metaItem:       { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  metaDivider:    { width: 1, backgroundColor: Colors.border, marginHorizontal: 8 },
+  metaDivider:    { width: 1, backgroundColor: c.border, marginHorizontal: 8 },
   metaIcon:       { fontSize: 20 },
-  metaLabel:      { color: Colors.muted, fontSize: FontSize.xs },
-  metaVal:        { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm },
+  metaLabel:      { color: c.muted, fontSize: FontSize.xs },
+  metaVal:        { color: c.text, fontWeight: '700', fontSize: FontSize.sm },
 
   navRow:         { flexDirection: 'row', gap: 12 },
-  navBtn:         { flex: 1, backgroundColor: Colors.subtle, borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center', gap: 6, borderWidth: 1, borderColor: Colors.border },
-  navBtnTxt:      { color: Colors.text, fontWeight: '700', fontSize: FontSize.xs },
+  navBtn:         { flex: 1, backgroundColor: c.subtle, borderRadius: Radius.md, padding: Spacing.md, alignItems: 'center', gap: 6, borderWidth: 1, borderColor: c.border },
+  navBtnTxt:      { color: c.text, fontWeight: '700', fontSize: FontSize.xs },
 
-  checkinSub:     { color: Colors.muted, fontSize: FontSize.sm },
+  checkinSub:     { color: c.muted, fontSize: FontSize.sm },
   acoesRow:       { flexDirection: 'row', gap: 10 },
 });

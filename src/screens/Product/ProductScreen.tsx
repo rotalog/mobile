@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
@@ -8,6 +10,9 @@ import { Colors, FontSize, Radius, Spacing } from '../../theme';
 interface Props { navigation: any; route: any; addToCart: (p: Produto) => void; }
 
 export function ProductScreen({ navigation, route, addToCart }: Props) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const p: Produto = route?.params?.produto ?? PRODUTOS[0];
   const fornecedores = FORNECEDORES.slice(0, 3).map(f => ({
     ...f,
@@ -23,10 +28,10 @@ export function ProductScreen({ navigation, route, addToCart }: Props) {
           <Text style={s.name}>{p.nome}</Text>
           <Text style={s.cat}>{p.categoria}</Text>
           <View style={s.badges}>
-            <Badge label="★ 4.7" color={Colors.warning} />
+            <Badge label="★ 4.7" color={colors.warning} />
             <Badge
               label={p.estoque ? 'Em estoque' : 'Indisponível'}
-              color={p.estoque ? Colors.green : Colors.danger}
+              color={p.estoque ? colors.green : colors.danger}
             />
           </View>
         </View>
@@ -57,18 +62,18 @@ export function ProductScreen({ navigation, route, addToCart }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   scroll:    { padding: Spacing.xl, gap: 12 },
   hero:      { alignItems: 'center', paddingVertical: Spacing.xl },
-  name:      { color: Colors.text, fontSize: FontSize.xl, fontWeight: '900', marginBottom: 4 },
-  cat:       { color: Colors.muted, marginBottom: 8 },
+  name:      { color: c.text, fontSize: FontSize.xl, fontWeight: '900', marginBottom: 4 },
+  cat:       { color: c.muted, marginBottom: 8 },
   badges:    { flexDirection: 'row', gap: 8 },
-  section:   { color: Colors.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
-  row:       { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  section:   { color: c.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
+  row:       { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border, flexDirection: 'row', alignItems: 'center', gap: 12 },
   fIcon:     { width: 52, height: 52, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center' },
-  fName:     { color: Colors.text, fontWeight: '700', fontSize: FontSize.base },
-  fMeta:     { color: Colors.muted, fontSize: FontSize.sm },
-  fPrice:    { color: Colors.green, fontWeight: '900', fontSize: FontSize.lg },
-  fUnit:     { color: Colors.muted, fontSize: FontSize.xs },
+  fName:     { color: c.text, fontWeight: '700', fontSize: FontSize.base },
+  fMeta:     { color: c.muted, fontSize: FontSize.sm },
+  fPrice:    { color: c.green, fontWeight: '900', fontSize: FontSize.lg },
+  fUnit:     { color: c.muted, fontSize: FontSize.xs },
 });

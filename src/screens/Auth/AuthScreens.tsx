@@ -6,11 +6,16 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Divider } from '../../components/ui/index';
 import { useAuth } from '../../context/AuthContext';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { FontSize, Radius, Spacing } from '../../theme';
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 export function LoginScreen({ navigation }: LoginProps) {
+  const s = useThemedStyles(buildAuthStyles);
+  const { colors } = useTheme();
+
   const [perfilLocal, setPerfilLocal] = useState<'comprador' | 'entregador'>('comprador');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -57,7 +62,7 @@ export function LoginScreen({ navigation }: LoginProps) {
 
       <Text style={s.terms}>
         Ao continuar, você aceita os{' '}
-        <Text style={{ color: Colors.green }}>Termos de Uso</Text>
+        <Text style={{ color: colors.green }}>Termos de Uso</Text>
       </Text>
     </ScrollView>
   );
@@ -65,6 +70,9 @@ export function LoginScreen({ navigation }: LoginProps) {
 // ── RECUPERAR SENHA ───────────────────────────────────────────────────────────
 type RecoverProps = NativeStackScreenProps<AuthStackParamList, 'Recover'>;
 export function RecoverScreen({ navigation }: RecoverProps) {
+  const s = useThemedStyles(buildAuthStyles);
+  const { colors } = useTheme();
+
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const { recoverPassword, loading } = useAuth();
@@ -83,7 +91,7 @@ export function RecoverScreen({ navigation }: RecoverProps) {
       ) : (
         <View style={s.center}>
           <Text style={{ fontSize: 64, marginBottom: 20 }}>✉️</Text>
-          <Text style={[s.h2, { color: Colors.green }]}>E-mail enviado!</Text>
+          <Text style={[s.h2, { color: colors.green }]}>E-mail enviado!</Text>
           <Text style={s.body}>Verifique sua caixa de entrada e siga as instruções.</Text>
           <Button label="VOLTAR AO LOGIN" onPress={() => navigation.navigate('Login')} full style={{ marginTop: 24 }} />
         </View>
@@ -95,6 +103,9 @@ export function RecoverScreen({ navigation }: RecoverProps) {
 // ── CADASTRO ──────────────────────────────────────────────────────────────────
 type RegisterProps = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 export function RegisterScreen({ navigation }: RegisterProps) {
+  const s = useThemedStyles(buildAuthStyles);
+  const { colors } = useTheme();
+
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ nome:'', email:'', telefone:'', senha:'', cep:'', rua:'', numero:'', bairro:'', cidade:'' });
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
@@ -104,7 +115,7 @@ export function RegisterScreen({ navigation }: RegisterProps) {
     <ScrollView style={s.scroll} contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
       {/* Progress */}
       <View style={s.progress}>
-        {[1,2].map(i => <View key={i} style={[s.progressBar, { backgroundColor: i <= step ? Colors.green : Colors.border }]} />)}
+        {[1,2].map(i => <View key={i} style={[s.progressBar, { backgroundColor: i <= step ? colors.green : colors.border }]} />)}
       </View>
       <Text style={s.section}>{step === 1 ? '— Dados básicos' : '— Endereço de entrega'}</Text>
 
@@ -128,7 +139,7 @@ export function RegisterScreen({ navigation }: RegisterProps) {
           <Button label="CRIAR CONTA" onPress={() => register({ ...form })} full loading={loading} />
           <Text style={s.terms}>
             Já tem conta?{' '}
-            <Text style={{ color: Colors.green }} onPress={() => navigation.navigate('Login')}>Entrar</Text>
+            <Text style={{ color: colors.green }} onPress={() => navigation.navigate('Login')}>Entrar</Text>
           </Text>
         </>
       )}
@@ -136,27 +147,27 @@ export function RegisterScreen({ navigation }: RegisterProps) {
   );
 }
 
-const s = StyleSheet.create({
-  scroll:       { flex: 1, backgroundColor: Colors.bg },
+const buildAuthStyles = (c: import('../../theme').ColorPalette) => ({
+  scroll:       { flex: 1, backgroundColor: c.bg },
   container:    { padding: Spacing.xxl, paddingTop: Spacing.xxxl },
   logo:         { alignItems: 'center', marginBottom: 40 },
-  logoBox:      { width: 72, height: 72, borderRadius: 22, backgroundColor: Colors.greenGlow, borderWidth: 2, borderColor: Colors.green, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  logoText:     { color: Colors.green, fontSize: FontSize.xxl, fontWeight: '900', letterSpacing: -1 },
-  logoSub:      { color: Colors.muted, fontSize: FontSize.sm, marginTop: 6 },
-  hint:         { color: Colors.muted, fontSize: FontSize.sm, marginBottom: 20 },
+  logoBox:      { width: 72, height: 72, borderRadius: 22, backgroundColor: c.greenGlow, borderWidth: 2, borderColor: c.green, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  logoText:     { color: c.green, fontSize: FontSize.xxl, fontWeight: '900', letterSpacing: -1 },
+  logoSub:      { color: c.muted, fontSize: FontSize.sm, marginTop: 6 },
+  hint:         { color: c.muted, fontSize: FontSize.sm, marginBottom: 20 },
   forgotWrap:   { alignItems: 'flex-end', marginBottom: 24 },
-  forgot:       { color: Colors.green, fontSize: FontSize.sm, fontWeight: '600' },
-  terms:        { textAlign: 'center', color: Colors.muted, fontSize: FontSize.xs, marginTop: 24 },
-  h2:           { color: Colors.text, fontSize: FontSize.xl, fontWeight: '800', marginBottom: 8 },
-  body:         { color: Colors.muted, fontSize: FontSize.base, lineHeight: 24, marginBottom: 24 },
+  forgot:       { color: c.green, fontSize: FontSize.sm, fontWeight: '600' },
+  terms:        { textAlign: 'center', color: c.muted, fontSize: FontSize.xs, marginTop: 24 },
+  h2:           { color: c.text, fontSize: FontSize.xl, fontWeight: '800', marginBottom: 8 },
+  body:         { color: c.muted, fontSize: FontSize.base, lineHeight: 24, marginBottom: 24 },
   center:       { alignItems: 'center' },
   progress:     { flexDirection: 'row', gap: 8, marginBottom: 24 },
   progressBar:  { flex: 1, height: 4, borderRadius: 4 },
-  section:      { color: Colors.muted, fontSize: FontSize.sm, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 20 },
+  section:      { color: c.muted, fontSize: FontSize.sm, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 20 },
   row:          { flexDirection: 'row', gap: 10 },
-  toggle:          { flexDirection: 'row', backgroundColor: Colors.subtle, borderRadius: Radius.lg, padding: 4, marginBottom: 24 },
+  toggle:          { flexDirection: 'row', backgroundColor: c.subtle, borderRadius: Radius.lg, padding: 4, marginBottom: 24 },
 toggleBtn:       { flex: 1, paddingVertical: 10, borderRadius: Radius.md, alignItems: 'center' },
-toggleBtnActive: { backgroundColor: Colors.green },
-toggleTxt:       { color: Colors.muted, fontWeight: '700', fontSize: FontSize.sm },
-toggleTxtActive: { color: '#0A0C0E' },
+toggleBtnActive: { backgroundColor: c.green },
+toggleTxt:       { color: c.muted, fontWeight: '700', fontSize: FontSize.sm },
+toggleTxtActive: { color: c.onPrimary },
 });

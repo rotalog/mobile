@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, FlatList } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -11,6 +13,9 @@ import { useAuth } from '../../context/AuthContext';
 type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
 
 export function HomeScreen({ navigation }: Props) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const [catAtiva, setCatAtiva] = useState('Todos');
   const [busca, setBusca] = useState('');
   const { user } = useAuth();
@@ -89,32 +94,32 @@ export function HomeScreen({ navigation }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: Colors.bg },
-  header:          { backgroundColor: Colors.surface, borderBottomWidth: 1, borderBottomColor: Colors.border, padding: Spacing.xl, paddingBottom: 0 },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:       { flex: 1, backgroundColor: c.bg },
+  header:          { backgroundColor: c.surface, borderBottomWidth: 1, borderBottomColor: c.border, padding: Spacing.xl, paddingBottom: 0 },
   headerTop:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
-  location:        { color: Colors.muted, fontSize: FontSize.sm },
-  greeting:        { color: Colors.text, fontSize: FontSize.lg, fontWeight: '800', marginTop: 4 },
-  searchBar:       { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.card, borderWidth: 1.5, borderColor: Colors.border, borderRadius: Radius.lg, padding: Spacing.md, gap: 10, marginBottom: Spacing.md },
-  searchIcon:      { fontSize: 16, color: Colors.muted },
-  searchPlaceholder:{ color: Colors.muted, fontSize: FontSize.base, flex: 1 },
+  location:        { color: c.muted, fontSize: FontSize.sm },
+  greeting:        { color: c.text, fontSize: FontSize.lg, fontWeight: '800', marginTop: 4 },
+  searchBar:       { flexDirection: 'row', alignItems: 'center', backgroundColor: c.card, borderWidth: 1.5, borderColor: c.border, borderRadius: Radius.lg, padding: Spacing.md, gap: 10, marginBottom: Spacing.md },
+  searchIcon:      { fontSize: 16, color: c.muted },
+  searchPlaceholder:{ color: c.muted, fontSize: FontSize.base, flex: 1 },
   cats:            { marginBottom: Spacing.md },
-  catChip:         { backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 7 },
-  catChipActive:   { backgroundColor: Colors.green, borderColor: Colors.green },
-  catText:         { color: Colors.muted, fontSize: FontSize.sm, fontWeight: '700' },
+  catChip:         { backgroundColor: c.card, borderWidth: 1, borderColor: c.border, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 7 },
+  catChipActive:   { backgroundColor: c.green, borderColor: c.green },
+  catText:         { color: c.muted, fontSize: FontSize.sm, fontWeight: '700' },
   catTextActive:   { color: '#0A0C0E' },
   list:            { padding: Spacing.xl, gap: 12 },
   listHeader:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  listTitle:       { color: Colors.text, fontWeight: '800', fontSize: FontSize.base },
-  listAll:         { color: Colors.green, fontSize: FontSize.sm, fontWeight: '700' },
-  card:            { backgroundColor: Colors.card, borderRadius: Radius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.border },
+  listTitle:       { color: c.text, fontWeight: '800', fontSize: FontSize.base },
+  listAll:         { color: c.green, fontSize: FontSize.sm, fontWeight: '700' },
+  card:            { backgroundColor: c.card, borderRadius: Radius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: c.border },
   cardRow:         { flexDirection: 'row', gap: Spacing.md, alignItems: 'center' },
   cardIcon:        { width: 56, height: 56, borderRadius: Radius.lg, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   cardInfo:        { flex: 1 },
   cardTop:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardName:        { fontWeight: '800', fontSize: FontSize.base, color: Colors.text, flex: 1 },
-  cardCat:         { color: Colors.muted, fontSize: FontSize.sm },
+  cardName:        { fontWeight: '800', fontSize: FontSize.base, color: c.text, flex: 1 },
+  cardCat:         { color: c.muted, fontSize: FontSize.sm },
   cardMeta:        { flexDirection: 'row', gap: Spacing.lg, marginTop: 8, flexWrap: 'wrap' },
-  metaText:        { color: Colors.muted, fontSize: FontSize.xs },
-  metaPrice:       { color: Colors.green, fontSize: FontSize.xs, fontWeight: '700' },
+  metaText:        { color: c.muted, fontSize: FontSize.xs },
+  metaPrice:       { color: c.green, fontSize: FontSize.xs, fontWeight: '700' },
 });

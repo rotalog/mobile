@@ -1,8 +1,9 @@
+import { useThemedStyles } from '../hooks/useThemedStyles';
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Colors, FontSize } from '../theme';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { FontSize } from '../theme';
  
 // ── Screens ───────────────────────────────────────────────────────────────────
 import { DriverRouteScreen }      from '../screens/Driver/DriverRouteScreen';
@@ -60,6 +61,7 @@ const DRIVER_TABS = [
 ];
  
 function DriverTabBar({ state, navigation }: any) {
+  const tb = useThemedStyles(buildTabStyles);
   return (
     <View style={tb.bar}>
       {state.routes.map((route: any, index: number) => {
@@ -100,10 +102,10 @@ export function DriverNavigator() {
 }
  
 // ── Styles ────────────────────────────────────────────────────────────────────
-const tb = StyleSheet.create({
-  bar:         { flexDirection: 'row', backgroundColor: Colors.surface, borderTopWidth: 1, borderTopColor: Colors.border, paddingBottom: 12, paddingTop: 8 },
+const buildTabStyles = (c: import('../theme').ColorPalette) => ({
+  bar:         { flexDirection: 'row', backgroundColor: c.surface, borderTopWidth: 1, borderTopColor: c.border, paddingBottom: 12, paddingTop: 8 },
   tab:         { flex: 1, alignItems: 'center', gap: 4 },
-  label:       { fontSize: FontSize.xs, color: Colors.muted, fontWeight: '500' },
-  labelActive: { color: Colors.green, fontWeight: '800' },
-  indicator:   { width: 24, height: 3, backgroundColor: Colors.green, borderRadius: 2 },
+  label:       { fontSize: FontSize.xs, color: c.muted, fontWeight: '500' },
+  labelActive: { color: c.green, fontWeight: '800' },
+  indicator:   { width: 24, height: 3, backgroundColor: c.green, borderRadius: 2 },
 });

@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +11,9 @@ import { api } from '../../services/api';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DriverDeliveryScreen({ navigation, route }: { navigation: any; route: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const ponto = route?.params?.ponto ?? { id: '1', nome: 'Cliente', documento: '' };
 
   const [fotoUri, setFotoUri]         = useState<string | null>(null);
@@ -162,27 +167,27 @@ const signatureStyle = `
 `;
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:       { flex: 1, backgroundColor: c.bg },
   list:            { padding: Spacing.xl, gap: 12 },
-  sectionLabel:    { fontSize: FontSize.xs, fontWeight: '700', color: Colors.green, letterSpacing: 1.2 },
+  sectionLabel:    { fontSize: FontSize.xs, fontWeight: '700', color: c.green, letterSpacing: 1.2 },
 
-  fotoBox:         { backgroundColor: Colors.card, borderRadius: Radius.lg, borderWidth: 2, borderColor: Colors.border, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', padding: Spacing.xxl, gap: 8, minHeight: 160 },
-  fotoBoxDone:     { borderStyle: 'solid', borderColor: Colors.green, padding: 0, overflow: 'hidden' },
+  fotoBox:         { backgroundColor: c.card, borderRadius: Radius.lg, borderWidth: 2, borderColor: c.border, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', padding: Spacing.xxl, gap: 8, minHeight: 160 },
+  fotoBoxDone:     { borderStyle: 'solid', borderColor: c.green, padding: 0, overflow: 'hidden' },
   fotoPreview:     { width: '100%', height: 200, borderRadius: Radius.lg },
-  fotoTxt:         { color: Colors.text, fontWeight: '700', fontSize: FontSize.base, textAlign: 'center' },
-  fotoSub:         { color: Colors.muted, fontSize: FontSize.xs, textAlign: 'center' },
+  fotoTxt:         { color: c.text, fontWeight: '700', fontSize: FontSize.base, textAlign: 'center' },
+  fotoSub:         { color: c.muted, fontSize: FontSize.xs, textAlign: 'center' },
   refazerBtn:      { alignSelf: 'center', marginTop: 4 },
-  refazerTxt:      { color: Colors.green, fontSize: FontSize.xs, fontWeight: '700' },
+  refazerTxt:      { color: c.green, fontSize: FontSize.xs, fontWeight: '700' },
 
-  assinaturaBox:   { backgroundColor: Colors.card, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border, overflow: 'hidden', minHeight: 200 },
+  assinaturaBox:   { backgroundColor: c.card, borderRadius: Radius.lg, borderWidth: 1, borderColor: c.border, overflow: 'hidden', minHeight: 200 },
   assinaturaFeita: { height: 200, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  assinaturaTxt:   { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm },
+  assinaturaTxt:   { color: c.text, fontWeight: '700', fontSize: FontSize.sm },
 
-  card:            { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
+  card:            { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border },
   recebedorRow:    { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  recebedorNome:   { color: Colors.text, fontWeight: '700', fontSize: FontSize.base },
-  recebedorDoc:    { color: Colors.muted, fontSize: FontSize.sm },
+  recebedorNome:   { color: c.text, fontWeight: '700', fontSize: FontSize.base },
+  recebedorDoc:    { color: c.muted, fontSize: FontSize.sm },
 
-  footer:          { padding: Spacing.xl, gap: 10, borderTopWidth: 1, borderTopColor: Colors.border, backgroundColor: Colors.surface },
+  footer:          { padding: Spacing.xl, gap: 10, borderTopWidth: 1, borderTopColor: c.border, backgroundColor: c.surface },
 });

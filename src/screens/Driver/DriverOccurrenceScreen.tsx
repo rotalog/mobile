@@ -1,3 +1,5 @@
+import { useThemedStyles } from '../../hooks/useThemedStyles';
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
@@ -14,6 +16,9 @@ const MOTIVOS = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DriverOccurrenceScreen({ navigation, route }: { navigation: any; route: any }) {
+  const s = useThemedStyles(buildStyles);
+  const { colors } = useTheme();
+
   const ponto = route?.params?.ponto ?? { id: '1' };
 
   const [motivoSelecionado, setMotivoSelecionado] = useState('');
@@ -62,7 +67,7 @@ export function DriverOccurrenceScreen({ navigation, route }: { navigation: any;
             </View>
             <Text style={{ fontSize: 20 }}>{m.icon}</Text>
             <View style={{ flex: 1 }}>
-              <Text style={[s.motivoLabel, motivoSelecionado === m.key && { color: Colors.text }]}>
+              <Text style={[s.motivoLabel, motivoSelecionado === m.key && { color: colors.text }]}>
                 {m.label}
               </Text>
               <Text style={s.motivoSub}>{m.sub}</Text>
@@ -77,7 +82,7 @@ export function DriverOccurrenceScreen({ navigation, route }: { navigation: any;
             value={observacao}
             onChangeText={setObservacao}
             placeholder="Adicione detalhes relevantes sobre o ocorrido..."
-            placeholderTextColor={Colors.muted}
+            placeholderTextColor={colors.muted}
             multiline
             numberOfLines={4}
             maxLength={250}
@@ -103,26 +108,26 @@ export function DriverOccurrenceScreen({ navigation, route }: { navigation: any;
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const s = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: Colors.bg },
+const buildStyles = (c: import('../../theme').ColorPalette) => ({
+  container:       { flex: 1, backgroundColor: c.bg },
   list:            { padding: Spacing.xl, gap: 12 },
 
-  titulo:          { color: Colors.text, fontWeight: '800', fontSize: FontSize.lg },
-  subtitulo:       { color: Colors.muted, fontSize: FontSize.sm, lineHeight: 20 },
-  sectionLabel:    { fontSize: FontSize.xs, fontWeight: '700', color: Colors.green, letterSpacing: 1.2 },
+  titulo:          { color: c.text, fontWeight: '800', fontSize: FontSize.lg },
+  subtitulo:       { color: c.muted, fontSize: FontSize.sm, lineHeight: 20 },
+  sectionLabel:    { fontSize: FontSize.xs, fontWeight: '700', color: c.green, letterSpacing: 1.2 },
 
-  motivoCard:      { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  motivoCardActive:{ borderColor: Colors.green },
-  motivoLabel:     { color: Colors.muted, fontWeight: '600', fontSize: FontSize.sm, marginBottom: 2 },
-  motivoSub:       { color: Colors.muted, fontSize: FontSize.xs, lineHeight: 16 },
+  motivoCard:      { backgroundColor: c.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: c.border, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  motivoCardActive:{ borderColor: c.green },
+  motivoLabel:     { color: c.muted, fontWeight: '600', fontSize: FontSize.sm, marginBottom: 2 },
+  motivoSub:       { color: c.muted, fontSize: FontSize.xs, lineHeight: 16 },
 
-  radio:           { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  radioActive:     { borderColor: Colors.green },
-  radioDot:        { width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.green },
+  radio:           { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: c.border, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  radioActive:     { borderColor: c.green },
+  radioDot:        { width: 10, height: 10, borderRadius: 5, backgroundColor: c.green },
 
-  obsBox:          { backgroundColor: Colors.card, borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border, padding: Spacing.md },
-  obsInput:        { color: Colors.text, fontSize: FontSize.sm, minHeight: 100, textAlignVertical: 'top' },
-  obsCount:        { color: Colors.muted, fontSize: FontSize.xs, textAlign: 'right', marginTop: 6 },
+  obsBox:          { backgroundColor: c.card, borderRadius: Radius.lg, borderWidth: 1, borderColor: c.border, padding: Spacing.md },
+  obsInput:        { color: c.text, fontSize: FontSize.sm, minHeight: 100, textAlignVertical: 'top' },
+  obsCount:        { color: c.muted, fontSize: FontSize.xs, textAlign: 'right', marginTop: 6 },
 
-  footer:          { padding: Spacing.xl, borderTopWidth: 1, borderTopColor: Colors.border, backgroundColor: Colors.surface },
+  footer:          { padding: Spacing.xl, borderTopWidth: 1, borderTopColor: c.border, backgroundColor: c.surface },
 });
