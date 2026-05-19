@@ -10,6 +10,7 @@ import { api } from '../../services/api';
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DriverDeliveryScreen({ navigation, route }: { navigation: any; route: any }) {
   const ponto = route?.params?.ponto ?? { id: '1', nome: 'Cliente', documento: '' };
+  const routeId = route?.params?.routeId ?? ponto.routeId;
 
   const [fotoUri, setFotoUri]         = useState<string | null>(null);
   const [assinatura, setAssinatura]   = useState<string | null>(null);
@@ -57,7 +58,7 @@ export function DriverDeliveryScreen({ navigation, route }: { navigation: any; r
       await api.post(`/api/v1/delivery-points/${ponto.id}/proof`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      navigation.navigate('DriverRoute');
+      navigation.goBack();
     } catch {
       Alert.alert('Erro', 'Não foi possível registrar a entrega. Tente novamente.');
     } finally {
@@ -137,7 +138,7 @@ export function DriverDeliveryScreen({ navigation, route }: { navigation: any; r
       <View style={s.footer}>
         <Button
           label="REGISTRAR PROBLEMA"
-          onPress={() => navigation.navigate('DriverOccurrence', { ponto })}
+          onPress={() => navigation.navigate('DriverOccurrence', { ponto, routeId })}
           variant="danger"
           full
         />

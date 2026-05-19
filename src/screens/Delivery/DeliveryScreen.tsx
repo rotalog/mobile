@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { Client } from '@stomp/stompjs';
+import { Client, IMessage } from '@stomp/stompjs';
 import { TopBar } from '../../components/layout/TopBar';
 import { Badge } from '../../components/ui/index';
 import { Button } from '../../components/ui/Button';
@@ -45,7 +45,7 @@ export function DeliveryScreen({ navigation }: { navigation: any }) {
       reconnectDelay: 5000,
       onConnect: () => {
         setConectado(true);
-        client.subscribe(`/topic/tracking/${PEDIDO.orderId}`, (msg) => {
+        client.subscribe(`/topic/tracking/${PEDIDO.orderId}`, (msg: IMessage) => {
           try {
             const payload = JSON.parse(msg.body);
             if (payload.lat && payload.lng) setEntregadorPos({ lat: payload.lat, lng: payload.lng });

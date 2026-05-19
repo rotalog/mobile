@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
 import { Button } from '../../components/ui/Button';
 import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { api } from '../../services/api';
 
 // ── Motivos de falha ──────────────────────────────────────────────────────────
 const MOTIVOS = [
@@ -17,7 +18,6 @@ export function DriverOccurrenceScreen({ navigation, route }: { navigation: any;
   const ponto = route?.params?.ponto ?? { id: '1' };
 
   const [motivoSelecionado, setMotivoSelecionado] = useState('');
-  const [observacao, setObservacao]               = useState('');
   const [loading, setLoading]                     = useState(false);
 
   const handleConfirmar = async () => {
@@ -27,12 +27,10 @@ export function DriverOccurrenceScreen({ navigation, route }: { navigation: any;
     }
     setLoading(true);
     try {
-      // TODO: await api.put(`/api/v1/delivery-points/${ponto.id}/fail`, {
-      //   reason: motivoSelecionado,
-      //   notes: observacao,
-      // })
-      await new Promise(r => setTimeout(r, 1000));
-      navigation.navigate('DriverRoute');
+      await api.put(`/api/v1/delivery-points/${ponto.id}/fail`, {
+        reason: motivoSelecionado,
+      });
+      navigation.reset({ index: 0, routes: [{ name: 'DriverRoute' }] });
     } catch {
       Alert.alert('Erro', 'Não foi possível registrar a ocorrência.');
     } finally {
@@ -69,23 +67,6 @@ export function DriverOccurrenceScreen({ navigation, route }: { navigation: any;
             </View>
           </TouchableOpacity>
         ))}
-
-        {/* Observações */}
-        <Text style={s.sectionLabel}>— OBSERVAÇÕES (OPCIONAL)</Text>
-        <View style={s.obsBox}>
-          <TextInput
-            value={observacao}
-            onChangeText={setObservacao}
-            placeholder="Adicione detalhes relevantes sobre o ocorrido..."
-            placeholderTextColor={Colors.muted}
-            multiline
-            numberOfLines={4}
-            maxLength={250}
-            style={s.obsInput}
-          />
-          <Text style={s.obsCount}>{observacao.length}/250 caracteres</Text>
-        </View>
-
       </ScrollView>
 
       {/* Rodapé */}
@@ -109,7 +90,6 @@ const s = StyleSheet.create({
 
   titulo:          { color: Colors.text, fontWeight: '800', fontSize: FontSize.lg },
   subtitulo:       { color: Colors.muted, fontSize: FontSize.sm, lineHeight: 20 },
-  sectionLabel:    { fontSize: FontSize.xs, fontWeight: '700', color: Colors.green, letterSpacing: 1.2 },
 
   motivoCard:      { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 },
   motivoCardActive:{ borderColor: Colors.green },

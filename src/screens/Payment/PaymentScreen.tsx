@@ -25,24 +25,44 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
   const [status, setStatus]   = useState<PaymentStatus>('idle');
   const [codigo, setCodigo]   = useState('');
   const pollingRef            = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollingIdRef          = useRef<string>(orderId);
+  const isSubmittingRef       = useRef(false);
 
   const totalFmt = `R$ ${total.toFixed(2).replace('.', ',')}`;
 
+  const applyPaymentStatus = (paymentStatus?: string | null) => {
+    if (paymentStatus === 'CONFIRMED' || paymentStatus === 'APPROVED') {
+      clearCart();
+      setStatus('confirmed');
+      pararPolling();
+      return true;
+    }
+
+    if (paymentStatus === 'FAILED' || paymentStatus === 'CANCELLED') {
+      setStatus('failed');
+      pararPolling();
+      return true;
+    }
+
+    return false;
+  };
+
   // Polling — verifica status do pagamento a cada 5s
   const iniciarPolling = (id: string) => {
+    pollingIdRef.current = id;
     pollingRef.current = setInterval(async () => {
       try {
         const { data } = await api.get(`/api/v1/payments/${id}`);
-        if (data.status === 'CONFIRMED' || data.status === 'APPROVED') {
-          clearCart();
-          setStatus('confirmed');
-          pararPolling();
-        } else if (data.status === 'FAILED' || data.status === 'CANCELLED') {
-          setStatus('failed');
-          pararPolling();
-        }
+        applyPaymentStatus(data.status);
       } catch {}
     }, 5000);
+  };
+
+  const verificarPagamento = async () => {
+    try {
+      const { data } = await api.get(`/api/v1/payments/${pollingIdRef.current}`);
+      applyPaymentStatus(data.status);
+    } catch {}
   };
 
   const pararPolling = () => {
@@ -58,6 +78,11 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
   }, []);
 
   const handleConfirm = async () => {
+    if (isSubmittingRef.current) {
+      return;
+    }
+
+    isSubmittingRef.current = true;
     setStatus('loading');
     try {
       const { data } = await api.post('/api/v1/payments/create', {
@@ -66,21 +91,19 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
         amount: total,
       });
 
-      // Salva código retornado pela API
       setCodigo(data.code ?? data.pixCode ?? data.boletoCode ?? '');
+
+      if (applyPaymentStatus(data.status)) {
+        return;
+      }
+
       setStatus('pending');
-
-      // Inicia polling pra verificar confirmação
-      iniciarPolling(data.paymentId ?? orderId);
-
+      iniciarPolling(String(data.orderId ?? orderId));
     } catch {
-      // Fallback mock se API não tiver pronta
-      const mockCodigo = method === 'pix'
-        ? '00020126580014br.gov.bcb.pix0136abc123-mock-key'
-        : '23790.12345 60000.123456 70000.123456 7 00000000034800';
-      setCodigo(mockCodigo);
-      clearCart();
-      setStatus('confirmed');
+      setCodigo('');
+      setStatus('failed');
+    } finally {
+      isSubmittingRef.current = false;
     }
   };
 
@@ -154,7 +177,7 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
 
           <Button
             label="JÁ PAGUEI"
-            onPress={() => { clearCart(); setStatus('confirmed'); pararPolling(); }}
+            onPress={verificarPagamento}
             full
           />
         </View>

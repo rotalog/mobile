@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Alert, View, Text, ScrollView, TouchableOpacity, Linking, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 import { TopBar } from '../../components/layout/TopBar';
 import { Button } from '../../components/ui/Button';
 import { Colors, FontSize, Radius, Spacing } from '../../theme';
@@ -19,7 +20,9 @@ export function DriverNavigationScreen({ navigation, route }: { navigation: any;
     lng: -60.020,
   };
 
-  const [checkinFeito, setCheckinFeito] = useState(false);
+  const [checkinFeito, setCheckinFeito] = useState((ponto.status ?? '') === 'ARRIVED');
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const isCheckingInRef = useRef(false);
 
   const regiao = {
     latitude:      ponto.lat ?? -3.096,
@@ -28,21 +31,56 @@ export function DriverNavigationScreen({ navigation, route }: { navigation: any;
     longitudeDelta: 0.008,
   };
 
+  const endereco = typeof ponto.endereco === 'string' ? ponto.endereco.trim() : '';
+  const hasCoordinates = Number.isFinite(ponto.lat) && Number.isFinite(ponto.lng);
+  const shouldUseCoordinateFallback = !endereco || endereco === 'Endereço não disponível';
+  const coordinateDestination = hasCoordinates ? `${ponto.lat},${ponto.lng}` : '';
+  const mapsDestination = shouldUseCoordinateFallback && coordinateDestination
+    ? coordinateDestination
+    : encodeURIComponent(endereco);
+  const wazeDestination = shouldUseCoordinateFallback && coordinateDestination
+    ? `ll=${coordinateDestination}`
+    : `q=${encodeURIComponent(endereco)}`;
+
   const abrirMaps = () => {
-    const enc = encodeURIComponent(ponto.endereco);
-    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${enc}`);
+    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${mapsDestination}`);
   };
 
   const abrirWaze = () => {
-    const enc = encodeURIComponent(ponto.endereco);
-    Linking.openURL(`https://waze.com/ul?q=${enc}&navigate=yes`);
+    Linking.openURL(`https://waze.com/ul?${wazeDestination}&navigate=yes`);
   };
 
   const handleCheckin = async () => {
+    if (checkinFeito || isCheckingInRef.current) {
+      return;
+    }
+
+    isCheckingInRef.current = true;
+    setIsCheckingIn(true);
+
     try {
-      await api.put(`/api/v1/delivery-points/${ponto.id}/arrive`);
-    } catch {}
-    setCheckinFeito(true);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permissão negada', 'Ative a localização para registrar sua chegada.');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      await api.put(`/api/v1/delivery-points/${ponto.id}/arrive`, {
+        driverLatitude: location.coords.latitude,
+        driverLongitude: location.coords.longitude,
+      });
+
+      setCheckinFeito(true);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível registrar sua chegada. Tente novamente.');
+    } finally {
+      isCheckingInRef.current = false;
+      setIsCheckingIn(false);
+    }
   };
 
   return (
@@ -120,7 +158,8 @@ export function DriverNavigationScreen({ navigation, route }: { navigation: any;
             label={checkinFeito ? '✓ CHECK-IN REALIZADO' : 'FAZER CHECK-IN'}
             onPress={handleCheckin}
             variant={checkinFeito ? 'ghost' : 'primary'}
-            disabled={checkinFeito}
+            loading={isCheckingIn}
+            disabled={checkinFeito || isCheckingIn}
             full
           />
         </View>
@@ -130,12 +169,12 @@ export function DriverNavigationScreen({ navigation, route }: { navigation: any;
           <View style={s.acoesRow}>
             <Button
               label="CONFIRMAR ENTREGA"
-              onPress={() => navigation.navigate('DriverDelivery', { ponto })}
+              onPress={() => navigation.navigate('DriverDelivery', { ponto, routeId: ponto.routeId ?? route?.params?.routeId })}
               style={{ flex: 1 }}
             />
             <Button
               label="REGISTRAR PROBLEMA"
-              onPress={() => navigation.navigate('DriverOccurrence', { ponto })}
+              onPress={() => navigation.navigate('DriverOccurrence', { ponto, routeId: ponto.routeId ?? route?.params?.routeId })}
               variant="danger"
               style={{ flex: 1 }}
             />

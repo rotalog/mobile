@@ -15,39 +15,63 @@ interface Rota {
   status: string;
 }
 
+interface BackendHistoryRoute {
+  id: string | number;
+  createdAt?: string;
+  origin?: string | null;
+  totalPoints?: number | null;
+  deliveredCount?: number | null;
+  failedCount?: number | null;
+  status?: string | null;
+}
+
 // ── Filtros ───────────────────────────────────────────────────────────────────
 const FILTROS = ['Todos', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
+function formatRouteDate(createdAt?: string) {
+  if (!createdAt) {
+    return '';
+  }
+
+  const date = new Date(createdAt);
+
+  if (Number.isNaN(date.getTime())) {
+    return createdAt;
+  }
+
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = FILTROS[date.getUTCMonth() + 1] ?? '';
+  const year = date.getUTCFullYear();
+
+  return `${day} ${month} ${year}`.trim();
+}
+
 const STATUS_COLOR: Record<string, string> = {
+  PLANNED: Colors.warning,
+  STARTED: Colors.warning,
   COMPLETED: Colors.green,
-  IN_PROGRESS: Colors.warning,
   CANCELLED: Colors.danger,
 };
 
 const STATUS_LABEL: Record<string, string> = {
-  COMPLETED:   'Concluída',
-  IN_PROGRESS: 'Em andamento',
-  CANCELLED:   'Cancelada',
+  PLANNED: 'Planejada',
+  STARTED: 'Em andamento',
+  COMPLETED: 'Concluída',
+  CANCELLED: 'Cancelada',
 };
-
-// ── Mock pra quando API não tiver dados ───────────────────────────────────────
-const MOCK_ROTAS: Rota[] = [
-  { id: '1', data: '17 Mai 2026', origem: 'Manaus - Centro',    totalEntregas: 12, entregues: 12, falhas: 0, status: 'COMPLETED'   },
-  { id: '2', data: '16 Mai 2026', origem: 'Manaus - Zona Sul',  totalEntregas: 8,  entregues: 7,  falhas: 1, status: 'COMPLETED'   },
-  { id: '3', data: '15 Mai 2026', origem: 'Manaus - Chapada',   totalEntregas: 10, entregues: 9,  falhas: 1, status: 'COMPLETED'   },
-  { id: '4', data: '14 Mai 2026', origem: 'Manaus - Aleixo',    totalEntregas: 6,  entregues: 6,  falhas: 0, status: 'COMPLETED'   },
-];
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DriverHistoryScreen({ navigation }: { navigation: any }) {
   const [rotas, setRotas]       = useState<Rota[]>([]);
   const [loading, setLoading]   = useState(true);
+  const [erro, setErro]         = useState('');
   const [filtroMes, setFiltroMes] = useState('Todos');
   const [filtroAno, setFiltroAno] = useState('2026');
 
   useEffect(() => {
     async function carregarHistorico() {
       try {
+        setErro('');
         // GET /api/v1/routes com filtros de data
         const params: any = {};
         if (filtroMes !== 'Todos') params.month = FILTROS.indexOf(filtroMes);
@@ -55,18 +79,18 @@ export function DriverHistoryScreen({ navigation }: { navigation: any }) {
 
         const { data } = await api.get('/api/v1/routes', { params });
 
-        setRotas(data.map((r: any) => ({
-          id:             r.id,
-          data:           r.date ?? r.createdAt ?? '',
-          origem:         r.origin ?? 'Manaus - AM',
+        setRotas((Array.isArray(data) ? data : []).map((r: BackendHistoryRoute) => ({
+          id:             String(r.id),
+          data:           formatRouteDate(r.createdAt),
+          origem:         r.origin?.trim() || 'Origem não disponível',
           totalEntregas:  r.totalPoints ?? 0,
           entregues:      r.deliveredCount ?? 0,
           falhas:         r.failedCount ?? 0,
           status:         r.status ?? 'COMPLETED',
         })));
       } catch {
-        // Usa mock se API não tiver dados ainda
-        setRotas(MOCK_ROTAS);
+        setRotas([]);
+        setErro('Não foi possível carregar o histórico de rotas.');
       } finally {
         setLoading(false);
       }
@@ -118,7 +142,7 @@ export function DriverHistoryScreen({ navigation }: { navigation: any }) {
       ) : rotas.length === 0 ? (
         <View style={s.center}>
           <Text style={{ fontSize: 40, marginBottom: 12 }}>📭</Text>
-          <Text style={s.emptyTxt}>Nenhuma rota encontrada.</Text>
+          <Text style={s.emptyTxt}>{erro || 'Nenhuma rota encontrada.'}</Text>
         </View>
       ) : (
         <FlatList

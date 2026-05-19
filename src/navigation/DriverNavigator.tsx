@@ -12,22 +12,21 @@ import { DriverOccurrenceScreen } from '../screens/Driver/DriverOccurrenceScreen
 import { DriverSummaryScreen }    from '../screens/Driver/DriverSummaryScreen';
 import { DriverHistoryScreen }  from '../screens/Driver/DriverHistoryScreen';
 import { ProfileScreen }  from '../screens/Driver/DriverProfile';
-import { PrivacyScreen } from '@/screens/Settings/PrivacyTermScreen';
-import { ContactScreen } from '@/screens/Settings/ContactScreen';
-import { DriverSettingsScreen } from '@/screens/Driver/DriverSettingsScreen';
+import { PrivacyScreen } from '../screens/Settings/PrivacyTermScreen';
+import { ContactScreen } from '../screens/Settings/ContactScreen';
+import { DriverSettingsScreen } from '../screens/Driver/DriverSettingsScreen';
  
 // ── Param Lists ───────────────────────────────────────────────────────────────
 export type DriverRouteStackParamList = {
-  DriverRoute:      undefined;
-  DriverNavigation: { ponto: any; index: number };
-  DriverDelivery:   { ponto: any };
-  DriverOccurrence: { ponto: any };
-  DriverSummary:    undefined;
-  DriverHistory:    undefined; 
-  Privacy:          undefined;
-  Contact:          undefined;
-  ProfileScreen:   undefined;
-  
+  DriverRoute: undefined;
+  DriverNavigation: { ponto: any; index: number; routeId?: string };
+  DriverDelivery: { ponto: any; routeId?: string };
+  DriverOccurrence: { ponto: any; routeId?: string };
+  DriverSummary: { routeId?: string } | undefined;
+  DriverHistory: undefined;
+  Privacy: undefined;
+  Contact: undefined;
+  ProfileScreen: undefined;
 };
  
 // ── Stacks ────────────────────────────────────────────────────────────────────
