@@ -1,32 +1,10 @@
 {
-  "extends": "@react-native/typescript-config",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "types": [
-      "jest"
-    ],
-    "baseUrl": "./src",
+    "strict": true,
+    "baseUrl": ".",
     "paths": {
-      "@navigation/*": [
-        "navigation/*"
-      ],
-      "@contexts/*": [
-        "contexts/*"
-      ],
-      "@hooks/*": [
-        "hooks/*"
-      ],
-      "@shared/*": [
-        "shared/*"
-      ],
-      "@auth/*": [
-        "auth/*"
-      ],
-      "@buyer/*": [
-        "buyer/*"
-      ],
-      "@driver/*": [
-        "driver/*"
-      ]
+      "@/*": ["src/*"]
     }
   },
   "include": [
@@ -34,7 +12,6 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "**/node_modules",
-    "**/Pods"
+    "node_modules"
   ]
 }

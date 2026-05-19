@@ -1,4 +1,33 @@
 {
-  "name": "rotalogMobile",
-  "displayName": "rotalogMobile"
+  "expo": {
+    "name": "Rotalog",
+    "slug": "rotalog",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "rotalog",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rotalog.mobile",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "O Rotalog usa sua localização para acompanhar entregas e rotas.",
+        "NSPhotoLibraryUsageDescription": "O Rotalog acessa fotos para anexar comprovantes de entrega.",
+        "NSCameraUsageDescription": "O Rotalog usa a câmera para registrar comprovantes de entrega."
+      }
+    },
+    "android": {
+      "package": "com.rotalog.mobile",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_MEDIA_IMAGES"
+      ]
+    },
+    "plugins": [
+      "expo-location",
+      "expo-image-picker"
+    ]
+  }
 }
