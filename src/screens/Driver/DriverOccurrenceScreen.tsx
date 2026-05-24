@@ -5,6 +5,7 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, StyleSheet 
 import { TopBar } from '../../components/layout/TopBar';
 import { Button } from '../../components/ui/Button';
 import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { FailureReason, failDeliveryPoint } from '../../services/deliveryPointsService';
 
 // ── Motivos de falha ──────────────────────────────────────────────────────────
 const MOTIVOS = [
@@ -32,11 +33,7 @@ export function DriverOccurrenceScreen({ navigation, route }: { navigation: any;
     }
     setLoading(true);
     try {
-      // TODO: await api.put(`/api/v1/delivery-points/${ponto.id}/fail`, {
-      //   reason: motivoSelecionado,
-      //   notes: observacao,
-      // })
-      await new Promise(r => setTimeout(r, 1000));
+      await failDeliveryPoint(ponto.id, motivoSelecionado as FailureReason);
       navigation.navigate('DriverRoute');
     } catch {
       Alert.alert('Erro', 'Não foi possível registrar a ocorrência.');

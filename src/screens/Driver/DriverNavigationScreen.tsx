@@ -3,10 +3,11 @@ import { useTheme } from '../../context/ThemeContext';
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Linking, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 import { TopBar } from '../../components/layout/TopBar';
 import { Button } from '../../components/ui/Button';
 import { Colors, FontSize, Radius, Spacing } from '../../theme';
-import { api } from '../../services/api';
+import { arriveAtDeliveryPoint } from '../../services/deliveryPointsService';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function DriverNavigationScreen({ navigation, route }: { navigation: any; route: any }) {
@@ -45,7 +46,17 @@ export function DriverNavigationScreen({ navigation, route }: { navigation: any;
 
   const handleCheckin = async () => {
     try {
-      await api.put(`/api/v1/delivery-points/${ponto.id}/arrive`);
+      const permissao = await Location.requestForegroundPermissionsAsync();
+      const loc = permissao.status === 'granted'
+        ? await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High })
+        : null;
+
+      await arriveAtDeliveryPoint(
+        ponto.id,
+        loc
+          ? { latitude: loc.coords.latitude, longitude: loc.coords.longitude }
+          : undefined
+      );
     } catch {}
     setCheckinFeito(true);
   };
