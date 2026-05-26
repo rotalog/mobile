@@ -10,6 +10,8 @@ import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+const logoImage = require('../../components/assets/logo.png');
+
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 export function LoginScreen({ navigation }: LoginProps) {
@@ -27,7 +29,7 @@ export function LoginScreen({ navigation }: LoginProps) {
       keyboardShouldPersistTaps="handled"
     >
       <View style={s.logo}>
-        <View style={s.logoBox}><Text style={{ fontSize: 32 }}>🚚</Text></View>
+        <Image source={logoImage} style={s.logoImage} resizeMode="contain" />
         <Text style={s.logoText}>RotaLog</Text>
         <Text style={s.logoSub}>Distribuição inteligente na palma da mão</Text>
       </View>
@@ -144,7 +146,7 @@ const createStyles = (colors: ColorPalette) => StyleSheet.create({
   scroll:       { flex: 1, backgroundColor: colors.bg },
   container:    { paddingHorizontal: Spacing.xxl },
   logo:         { alignItems: 'center', marginBottom: 40 },
-  logoBox:      { width: 72, height: 72, borderRadius: 22, backgroundColor: colors.greenGlow, borderWidth: 2, borderColor: colors.green, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  logoImage:    { width: 120, height: 120, marginBottom: 16 },
   logoText:     { color: colors.green, fontSize: FontSize.xxl, fontWeight: '900', letterSpacing: -1 },
   logoSub:      { color: colors.muted, fontSize: FontSize.sm, marginTop: 6 },
   hint:         { color: colors.muted, fontSize: FontSize.sm, marginBottom: 20 },
