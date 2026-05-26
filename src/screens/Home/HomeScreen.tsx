@@ -113,7 +113,11 @@ export function HomeScreen({ navigation }: Props) {
                   <Text style={s.metaPrice}>{f.preco_medio}</Text>
                 </View>
          
-            {f.badge && <View style={{ marginTop: 10 }}><Badge label={f.badge} /></View>}
+            {f.badge && (
+ <View style={{ marginTop: 10 }}>
+<Badge label={f.badge} />
+</View>
+)}
           </TouchableOpacity>
         )}
       />
