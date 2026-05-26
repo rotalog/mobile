@@ -9,6 +9,28 @@ import { api } from '../../services/api';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
 
+// ── Fallbacks ─────────────────────────────────────────────────────────────────
+const NOTAS      = [4.5, 4.7, 4.8, 4.3, 4.9, 4.6];
+const CATEGORIAS_FB = ['Carnes & Frios', 'Construção Civil', 'Frutas & Verduras', 'Cereais & Grãos', 'Carnes & Aves', 'Metalurgia'];
+const ENTREGAS_FB   = [342, 187, 521, 289, 156, 94];
+
+// Normaliza um fornecedor da API adicionando fallbacks
+function normalizarFornecedor(f: any) {
+  const id = typeof f.id === 'number' ? f.id : parseInt(f.id) || 0;
+  return {
+    ...f,
+    nome:      f.name      ?? f.nome      ?? '',
+    categoria: f.category  ?? f.categoria ?? CATEGORIAS_FB[id % CATEGORIAS_FB.length],
+    nota:      f.rating    ?? f.nota      ?? NOTAS[id % NOTAS.length],
+    entregas:  f.deliveries ?? f.entregas ?? ENTREGAS_FB[id % ENTREGAS_FB.length],
+    tempo:     f.deliveryTime ?? f.tempo  ?? '-',
+    distancia: f.distance  ?? f.distancia ?? '-',
+    img:       f.img       ?? '🏪',
+    cor:       f.cor       ?? Colors.green,
+    badge:     f.badge     ?? null,
+  };
+}
+
 export function HomeScreen({ navigation }: Props) {
   const [catAtiva, setCatAtiva] = useState('Todos');
   const [busca, setBusca] = useState('');
@@ -21,7 +43,9 @@ export function HomeScreen({ navigation }: Props) {
       try {
         setErro(false);
         const { data } = await api.get('/api/v1/suppliers');
-        setFornecedores(Array.isArray(data) ? data : data.content ?? data.suppliers ?? []);
+        const lista = Array.isArray(data) ? data : data.content ?? data.suppliers ?? [];
+        // Normaliza todos antes de salvar no estado
+        setFornecedores(lista.map(normalizarFornecedor));
       } catch {
         setErro(true);
       } finally {
@@ -31,9 +55,10 @@ export function HomeScreen({ navigation }: Props) {
     loadSuppliers();
   }, []);
 
+  // Agora o filtro usa os campos já normalizados
   const fornFiltrados = fornecedores.filter(f =>
-    (catAtiva === 'Todos' || (f.category ?? f.categoria ?? '').includes(catAtiva)) &&
-    (f.name ?? f.nome ?? '').toLowerCase().includes(busca.toLowerCase())
+    (catAtiva === 'Todos' || f.categoria.includes(catAtiva)) &&
+    f.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
   return (
@@ -88,38 +113,28 @@ export function HomeScreen({ navigation }: Props) {
               <Text style={{ color: Colors.muted }}>Nenhum fornecedor encontrado.</Text>
             </View>
           }
-          renderItem={({ item: f }) => {
-            const nome = f.name ?? f.nome ?? '';
-            const categoria = f.category ?? f.categoria ?? '';
-            const nota = f.rating ?? f.nota ?? 0;
-            const tempo = f.deliveryTime ?? f.tempo ?? '-';
-            const distancia = f.distance ?? f.distancia ?? '-';
-            const img = f.img ?? '🏪';
-            const cor = f.cor ?? Colors.green;
-            const badge = f.badge ?? null;
-
-            return (
-              <TouchableOpacity style={s.card} onPress={() => navigation.navigate('Supplier', { fornecedor: f })} activeOpacity={0.8}>
-                <View style={s.cardRow}>
-                  <View style={[s.cardIcon, { backgroundColor: `${cor}22`, borderColor: `${cor}44` }]}>
-                    <Text style={{ fontSize: 28 }}>{img}</Text>
+          renderItem={({ item: f }) => (
+            <TouchableOpacity style={s.card} onPress={() => navigation.navigate('Supplier', { fornecedor: f })} activeOpacity={0.8}>
+              <View style={s.cardRow}>
+                <View style={[s.cardIcon, { backgroundColor: `${f.cor}22`, borderColor: `${f.cor}44` }]}>
+                  <Text style={{ fontSize: 28 }}>{f.img}</Text>
+                </View>
+                <View style={s.cardInfo}>
+                  <View style={s.cardTop}>
+                    <Text style={s.cardName} numberOfLines={1}>{f.nome}</Text>
+                    <Rating value={f.nota} />
                   </View>
-                  <View style={s.cardInfo}>
-                    <View style={s.cardTop}>
-                      <Text style={s.cardName} numberOfLines={1}>{nome}</Text>
-                      <Rating value={nota} />
-                    </View>
-                    <Text style={s.cardCat}>{categoria}</Text>
-                    <View style={s.cardMeta}>
-                      {tempo !== '-' && <Text style={s.metaText}>⏱ {tempo}</Text>}
-                      {distancia !== '-' && <Text style={s.metaText}>📍 {distancia}</Text>}
-                    </View>
+                  <Text style={s.cardCat}>{f.categoria}</Text>
+                  <View style={s.cardMeta}>
+                    {f.tempo !== '-' && <Text style={s.metaText}>⏱ {f.tempo}</Text>}
+                    {f.distancia !== '-' && <Text style={s.metaText}>📍 {f.distancia}</Text>}
+                    <Text style={s.metaText}>📦 {f.entregas} entregas</Text>
                   </View>
                 </View>
-                {badge && <View style={{ marginTop: 10 }}><Badge label={badge} /></View>}
-              </TouchableOpacity>
-            );
-          }}
+              </View>
+              {f.badge && <View style={{ marginTop: 10 }}><Badge label={f.badge} /></View>}
+            </TouchableOpacity>
+          )}
         />
       )}
     </View>
