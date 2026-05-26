@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
 import { Button } from '../../components/ui/Button';
 import { CartItem } from '../../hooks/useCart';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
-import { api } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
   navigation: any;
@@ -15,31 +14,12 @@ interface Props {
 }
 
 export function CartScreen({ navigation, cart, updateQty, total }: Props) {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { colors } = useTheme();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
 
-  const handleFinalizarPedido = async () => {
+  const handleFinalizarPedido = () => {
     if (cart.length === 0) return;
-    setLoading(true);
-    try {
-      const items = cart.map(i => ({
-        productId: i.id,
-        quantity: i.qty,
-      }));
-      const { data } = await api.post('/api/v1/orders', {
-        buyerId: user?.id,
-        items,
-      });
-      const orderId = data.id ?? data.orderId ?? `${Date.now()}`;
-      navigation.navigate('Payment', { total, orderId });
-    } catch (err: any) {
-      Alert.alert(
-        'Erro ao criar pedido',
-        err?.response?.data?.message ?? 'Não foi possível criar o pedido. Tente novamente.',
-      );
-    } finally {
-      setLoading(false);
-    }
+    navigation.navigate('Payment', { total, orderId: `${Date.now()}` });
   };
 
   return (
@@ -72,7 +52,7 @@ export function CartScreen({ navigation, cart, updateQty, total }: Props) {
                   </TouchableOpacity>
                   <Text style={s.qtyNum}>{item.qty}</Text>
                   <TouchableOpacity onPress={() => updateQty(item.id, item.fornecedor, +1)} style={[s.qtyBtn, s.qtyBtnGreen]}>
-                    <Text style={[s.qtyBtnTxt, { color: '#0A0C0E' }]}>+</Text>
+                    <Text style={[s.qtyBtnTxt, { color: colors.onPrimary }]}>+</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -86,7 +66,6 @@ export function CartScreen({ navigation, cart, updateQty, total }: Props) {
             <Button
               label="FINALIZAR PEDIDO"
               onPress={handleFinalizarPedido}
-              loading={loading}
             />
           </View>
         </>
@@ -95,25 +74,25 @@ export function CartScreen({ navigation, cart, updateQty, total }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container:   { flex: 1, backgroundColor: Colors.bg },
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
+  container:   { flex: 1, backgroundColor: colors.bg },
   empty:       { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  emptyTitle:  { color: Colors.text, fontSize: FontSize.lg, fontWeight: '800', marginBottom: 8 },
-  emptySub:    { color: Colors.muted, textAlign: 'center' },
+  emptyTitle:  { color: colors.text, fontSize: FontSize.lg, fontWeight: '800', marginBottom: 8 },
+  emptySub:    { color: colors.muted, textAlign: 'center' },
   list:        { padding: Spacing.xl, gap: 12 },
-  item:        { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, flexDirection: 'row', gap: 12, alignItems: 'center' },
-  itemIcon:    { backgroundColor: Colors.surface, borderRadius: Radius.md, padding: 8 },
+  item:        { backgroundColor: colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', gap: 12, alignItems: 'center' },
+  itemIcon:    { backgroundColor: colors.surface, borderRadius: Radius.md, padding: 8 },
   itemInfo:    { flex: 1 },
-  itemName:    { color: Colors.text, fontWeight: '700', fontSize: FontSize.base },
-  itemSup:     { color: Colors.muted, fontSize: FontSize.sm },
-  itemPrice:   { color: Colors.green, fontWeight: '800', fontSize: FontSize.base },
+  itemName:    { color: colors.text, fontWeight: '700', fontSize: FontSize.base },
+  itemSup:     { color: colors.muted, fontSize: FontSize.sm },
+  itemPrice:   { color: colors.green, fontWeight: '800', fontSize: FontSize.base },
   qtyRow:      { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  qtyBtn:      { backgroundColor: Colors.subtle, borderRadius: 8, width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
-  qtyBtnGreen: { backgroundColor: Colors.green },
-  qtyBtnTxt:   { color: Colors.text, fontSize: 16, fontWeight: '800' },
-  qtyNum:      { color: Colors.text, fontWeight: '800', minWidth: 20, textAlign: 'center' },
-  footer:      { padding: Spacing.xl, backgroundColor: Colors.surface, borderTopWidth: 1, borderTopColor: Colors.border },
+  qtyBtn:      { backgroundColor: colors.subtle, borderRadius: 8, width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
+  qtyBtnGreen: { backgroundColor: colors.green },
+  qtyBtnTxt:   { color: colors.text, fontSize: 16, fontWeight: '800' },
+  qtyNum:      { color: colors.text, fontWeight: '800', minWidth: 20, textAlign: 'center' },
+  footer:      { padding: Spacing.xl, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border },
   totalRow:    { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.md },
-  totalLabel:  { color: Colors.muted, fontSize: FontSize.base },
-  totalValue:  { color: Colors.green, fontSize: FontSize.xl, fontWeight: '900' },
+  totalLabel:  { color: colors.muted, fontSize: FontSize.base },
+  totalValue:  { color: colors.green, fontSize: FontSize.xl, fontWeight: '900' },
 });

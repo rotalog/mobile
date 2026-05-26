@@ -1,62 +1,52 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
 import { Badge } from '../../components/ui/index';
 import { Button } from '../../components/ui/Button';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
-import { api } from '../../services/api';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
+import { DeliveryOrder, DeliveryStatus, useDelivery } from '../../context/DeliveryContext';
 
-const STEPS = ['Confirmado', 'Em rota', 'Entregue'];
+const STEPS: { status: DeliveryStatus; label: string; icon: string }[] = [
+  { status: 'confirmed', label: 'Confirmado', icon: '📦' },
+  { status: 'route', label: 'Em rota', icon: '🚚' },
+  { status: 'delivered', label: 'Entregue', icon: '📍' },
+];
 
-// Mapeamento de status da API para fase visual (1, 2, 3)
-const STATUS_TO_FASE: Record<string, 1|2|3> = {
-  PENDING: 1, ACCEPTED: 1, PREPARING: 1,
-  DISPATCHED: 2,
-  DELIVERED: 3,
+const STATUS_INDEX: Record<DeliveryStatus, number> = {
+  confirmed: 0,
+  route: 1,
+  delivered: 2,
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  PENDING: 'Em separação', ACCEPTED: 'Em separação', PREPARING: 'Em separação',
-  DISPATCHED: 'Em rota',
-  DELIVERED: 'Próximo',
+const STATUS_COPY: Record<DeliveryStatus, { title: string; sub: string; badge: string }> = {
+  confirmed: {
+    title: 'Pedido confirmado',
+    sub: 'Seu pedido foi registrado e está sendo preparado pelo fornecedor.',
+    badge: 'Confirmado',
+  },
+  route: {
+    title: 'Entregador em rota',
+    sub: 'Seu pedido saiu para entrega e está a caminho.',
+    badge: 'Em rota',
+  },
+  delivered: {
+    title: 'Pedido entregue',
+    sub: 'Entrega concluída. Obrigado por comprar com a RotaLog.',
+    badge: 'Entregue',
+  },
 };
 
 export function DeliveryScreen({ navigation }: { navigation: any }) {
-  const [pedidos, setPedidos]   = useState<any[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const pollingRef               = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  async function fetchOrders() {
-    try {
-      const { data } = await api.get('/api/v1/orders');
-      const list = Array.isArray(data) ? data : data.content ?? data.orders ?? [];
-      // filtra apenas pedidos ativos (não entregues nem cancelados)
-      const ativos = list.filter((p: any) =>
-        !['DELIVERED', 'CANCELLED', 'REJECTED', 'entregue', 'cancelado'].includes(p.status)
-      );
-      setPedidos(ativos);
-    } catch {
-      // silencia erros de polling
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchOrders();
-    // Poll a cada 15 segundos para simular atualização em tempo real
-    // (substituir por WebSocket /topic/tracking/{orderId} quando disponível)
-    pollingRef.current = setInterval(fetchOrders, 15_000);
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-    };
-  }, []);
+  const { colors } = useTheme();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
+  const { orders, updateOrderStatus } = useDelivery();
+  const latestOrder = orders[0];
 
   return (
     <View style={s.container}>
       <TopBar title="Acompanhar Entregas" />
 
-      {/* Placeholder do mapa */}
       <View style={s.map}>
         {[...Array(6)].map((_, i) => (
           <View key={`v${i}`} style={[s.gridLine, s.gridLineV, { left: `${i * 20}%` as any }]} />
@@ -65,114 +55,140 @@ export function DeliveryScreen({ navigation }: { navigation: any }) {
           <View key={`h${i}`} style={[s.gridLine, s.gridLineH, { top: `${i * 25}%` as any }]} />
         ))}
         <View style={s.liveBadge}>
-          <Text style={{ color: Colors.green, fontWeight: '700', fontSize: FontSize.sm }}>
-            {pedidos.length > 0 ? '🔴 AO VIVO' : '📦 SEM PEDIDOS ATIVOS'}
+          <Text style={s.liveText}>
+            {orders.length > 0 ? 'AO VIVO' : 'SEM PEDIDOS ATIVOS'}
           </Text>
         </View>
         <Text style={{ fontSize: 48 }}>
-          {pedidos.length > 0
-            ? (STATUS_TO_FASE[pedidos[0]?.status] === 3 ? '📍' : STATUS_TO_FASE[pedidos[0]?.status] === 2 ? '🚚' : '📦')
-            : '🗺️'}
+          {latestOrder ? STEPS[STATUS_INDEX[latestOrder.status]].icon : '🗺️'}
         </Text>
       </View>
 
-      {loading ? (
-        <View style={s.center}><ActivityIndicator color={Colors.green} size="large" /></View>
-      ) : (
-        <ScrollView contentContainerStyle={s.list}>
-          {pedidos.length === 0 ? (
-            <View style={[s.card, { alignItems: 'center' }]}>
-              <Text style={{ color: Colors.muted, fontSize: FontSize.sm, marginBottom: 8 }}>
-                Sem pedidos ativos no momento
-              </Text>
-              <Button label="FAZER PEDIDO" onPress={() => navigation.navigate('HomeTab')} sm />
-            </View>
-          ) : (
-            pedidos.map(pedido => {
-              const fase    = STATUS_TO_FASE[pedido.status] ?? 1;
-              const etapa   = fase;
-              const status  = STATUS_LABEL[pedido.status] ?? pedido.status;
-              const prodNome = pedido.items?.[0]?.productName ?? pedido.items?.[0]?.nome ?? 'Pedido';
-              const fornNome = pedido.supplierName ?? pedido.supplier?.name ?? '-';
-              const pedidoId = `#${pedido.id?.toString().replace('#','') ?? '-'}`;
-
-              return (
-                <View key={pedido.id} style={[s.card, { borderColor: `${Colors.green}44` }]}>
-                  <View style={s.cardTop}>
-                    <View>
-                      <Text style={s.cardId}>{pedidoId}</Text>
-                      <Text style={s.cardProd}>{prodNome}</Text>
-                      <Text style={s.cardSup}>por {fornNome}</Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      <Badge label={status} />
-                    </View>
-                  </View>
-
-                  {/* Banner de fase */}
-                  <View style={s.faseBanner}>
-                    <Text style={s.faseIcon}>{fase === 1 ? '📦' : fase === 2 ? '🚚' : '📍'}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={s.faseTitle}>
-                        {fase === 1 ? 'Pedido em separação' : fase === 2 ? 'Entregador em rota' : 'Entregador próximo!'}
-                      </Text>
-                      <Text style={s.faseSub}>
-                        {fase === 1 ? 'Seu pedido está sendo preparado pelo fornecedor.'
-                          : fase === 2 ? 'Seu pedido está a caminho.'
-                          : 'Fique atento, está chegando!'}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Tracker */}
-                  <View style={s.tracker}>
-                    {STEPS.map((step, i) => (
-                      <React.Fragment key={step}>
-                        <View style={[s.dot, i < etapa && s.dotActive]}>
-                          {i < etapa && <Text style={{ color: '#0A0C0E', fontSize: 10, fontWeight: '900' }}>✓</Text>}
-                        </View>
-                        {i < STEPS.length - 1 && (
-                          <View style={[s.line, i < etapa - 1 && s.lineActive]} />
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </View>
-                  <View style={s.trackerLabels}>
-                    {STEPS.map(step => <Text key={step} style={s.trackerLabel}>{step}</Text>)}
-                  </View>
-                </View>
-              );
-            })
-          )}
-        </ScrollView>
-      )}
+      <ScrollView contentContainerStyle={s.list}>
+        {orders.length === 0 ? (
+          <View style={[s.card, { alignItems: 'center' }]}>
+            <Text style={s.emptyText}>Sem pedidos ativos no momento</Text>
+            <Button label="FAZER PEDIDO" onPress={() => navigation.navigate('HomeTab')} sm />
+          </View>
+        ) : (
+          orders.map(order => (
+            <OrderCard
+              key={order.id}
+              order={order}
+              styles={s}
+              colors={colors}
+              onChangeStatus={status => updateOrderStatus(order.id, status)}
+            />
+          ))
+        )}
+      </ScrollView>
     </View>
   );
 }
 
-const s = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: Colors.bg },
-  map:             { height: 200, backgroundColor: '#0d1117', alignItems: 'center', justifyContent: 'center', borderBottomWidth: 1, borderBottomColor: Colors.border, position: 'relative', overflow: 'hidden' },
-  gridLine:        { position: 'absolute', backgroundColor: `${Colors.border}44` },
+interface OrderCardProps {
+  order: DeliveryOrder;
+  styles: ReturnType<typeof createStyles>;
+  colors: ColorPalette;
+  onChangeStatus: (status: DeliveryStatus) => void;
+}
+
+function OrderCard({ order, styles: s, colors, onChangeStatus }: OrderCardProps) {
+  const currentStep = STATUS_INDEX[order.status];
+  const copy = STATUS_COPY[order.status];
+  const firstItem = order.items[0];
+  const productLabel = firstItem
+    ? `${firstItem.nome}${order.items.length > 1 ? ` +${order.items.length - 1}` : ''}`
+    : 'Pedido';
+  const supplierLabel = firstItem?.fornecedor ?? 'Fornecedor';
+
+  return (
+    <View style={[s.card, { borderColor: `${colors.green}44` }]}>
+      <View style={s.cardTop}>
+        <View>
+          <Text style={s.cardId}>#{order.id}</Text>
+          <Text style={s.cardProd}>{productLabel}</Text>
+          <Text style={s.cardSup}>por {supplierLabel}</Text>
+        </View>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Badge label={copy.badge} />
+          <Text style={s.cardTotal}>R$ {order.total.toFixed(2)}</Text>
+        </View>
+      </View>
+
+      <View style={s.faseBanner}>
+        <Text style={s.faseIcon}>{STEPS[currentStep].icon}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={s.faseTitle}>{copy.title}</Text>
+          <Text style={s.faseSub}>{copy.sub}</Text>
+        </View>
+      </View>
+
+      <View style={s.tracker}>
+        {STEPS.map((step, i) => {
+          const isActive = i <= currentStep;
+          return (
+            <React.Fragment key={step.status}>
+              <TouchableOpacity
+                style={[s.dot, isActive && s.dotActive]}
+                onPress={() => onChangeStatus(step.status)}
+                activeOpacity={0.75}
+              >
+                <Text style={[s.dotText, isActive && { color: colors.onPrimary }]}>
+                  {i + 1}
+                </Text>
+              </TouchableOpacity>
+              {i < STEPS.length - 1 && (
+                <TouchableOpacity
+                  style={[s.line, i < currentStep && s.lineActive]}
+                  onPress={() => onChangeStatus(STEPS[i + 1].status)}
+                  activeOpacity={0.75}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </View>
+      <View style={s.trackerLabels}>
+        {STEPS.map(step => (
+          <TouchableOpacity key={step.status} onPress={() => onChangeStatus(step.status)}>
+            <Text style={[s.trackerLabel, order.status === step.status && s.trackerLabelActive]}>
+              {step.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
+  container:       { flex: 1, backgroundColor: colors.bg },
+  map:             { height: 200, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 1, borderBottomColor: colors.border, position: 'relative', overflow: 'hidden' },
+  gridLine:        { position: 'absolute', backgroundColor: `${colors.border}66` },
   gridLineV:       { top: 0, bottom: 0, width: 1 },
   gridLineH:       { left: 0, right: 0, height: 1 },
-  liveBadge:       { position: 'absolute', top: 12, left: 12, backgroundColor: 'rgba(10,12,14,0.92)', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: `${Colors.green}44` },
+  liveBadge:       { position: 'absolute', top: 12, left: 12, backgroundColor: colors.overlay, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: `${colors.green}44` },
+  liveText:        { color: colors.green, fontWeight: '700', fontSize: FontSize.sm },
   list:            { padding: Spacing.xl, gap: 12 },
-  center:          { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  card:            { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  cardTop:         { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
-  cardId:          { fontWeight: '800', color: Colors.text, fontSize: FontSize.base },
-  cardProd:        { color: Colors.muted, fontSize: FontSize.sm },
-  cardSup:         { color: Colors.muted, fontSize: FontSize.xs },
-  faseBanner:      { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Colors.subtle, borderRadius: Radius.md, padding: Spacing.md, marginBottom: 16 },
+  emptyText:       { color: colors.muted, fontSize: FontSize.sm, marginBottom: 8 },
+  card:            { backgroundColor: colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: colors.border },
+  cardTop:         { flexDirection: 'row', justifyContent: 'space-between', gap: 12, marginBottom: 16 },
+  cardId:          { fontWeight: '800', color: colors.text, fontSize: FontSize.base },
+  cardProd:        { color: colors.muted, fontSize: FontSize.sm },
+  cardSup:         { color: colors.muted, fontSize: FontSize.xs },
+  cardTotal:       { color: colors.green, fontSize: FontSize.xs, fontWeight: '800', marginTop: 6 },
+  faseBanner:      { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.subtle, borderRadius: Radius.md, padding: Spacing.md, marginBottom: 16 },
   faseIcon:        { fontSize: 28 },
-  faseTitle:       { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 2 },
-  faseSub:         { color: Colors.muted, fontSize: FontSize.xs, lineHeight: 18 },
+  faseTitle:       { color: colors.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 2 },
+  faseSub:         { color: colors.muted, fontSize: FontSize.xs, lineHeight: 18 },
   tracker:         { flexDirection: 'row', alignItems: 'center' },
-  dot:             { width: 24, height: 24, borderRadius: 12, backgroundColor: Colors.subtle, alignItems: 'center', justifyContent: 'center' },
-  dotActive:       { backgroundColor: Colors.green },
-  line:            { flex: 1, height: 2, backgroundColor: Colors.border },
-  lineActive:      { backgroundColor: Colors.green },
-  trackerLabels:   { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
-  trackerLabel:    { color: Colors.muted, fontSize: FontSize.xs },
+  dot:             { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.subtle, alignItems: 'center', justifyContent: 'center' },
+  dotActive:       { backgroundColor: colors.green },
+  dotText:         { color: colors.muted, fontSize: FontSize.xs, fontWeight: '900' },
+  line:            { flex: 1, height: 6, backgroundColor: colors.border, borderRadius: 3 },
+  lineActive:      { backgroundColor: colors.green },
+  trackerLabels:   { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  trackerLabel:    { color: colors.muted, fontSize: FontSize.xs, fontWeight: '700' },
+  trackerLabelActive: { color: colors.green },
 });

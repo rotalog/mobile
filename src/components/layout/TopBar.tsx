@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface TopBarProps {
   title: string;
@@ -12,6 +13,9 @@ interface TopBarProps {
 
 export function TopBar({ title, onBack, right, transparent }: TopBarProps) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={[
       styles.container,
@@ -29,12 +33,12 @@ export function TopBar({ title, onBack, right, transparent }: TopBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
   container:   { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingHorizontal: Spacing.xl, paddingBottom: Spacing.md },
-  solid:       { backgroundColor: Colors.surface, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  solid:       { backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
   transparent: { backgroundColor: 'transparent' },
-  backBtn:     { width: 38, height: 38, borderRadius: Radius.md, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
-  backIcon:    { color: Colors.text, fontSize: 18 },
-  title:       { flex: 1, fontWeight: '800', fontSize: FontSize.md, color: Colors.text },
+  backBtn:     { width: 38, height: 38, borderRadius: Radius.md, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  backIcon:    { color: colors.text, fontSize: 18 },
+  title:       { flex: 1, fontWeight: '800', fontSize: FontSize.md, color: colors.text },
   placeholder: { width: 38 },
 });

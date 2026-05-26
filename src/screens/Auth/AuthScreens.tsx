@@ -6,17 +6,26 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Divider } from '../../components/ui/index';
 import { useAuth } from '../../context/AuthContext';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
 type LoginProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 export function LoginScreen({ navigation }: LoginProps) {
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const { login, loading } = useAuth();
 
   return (
-    <ScrollView style={s.scroll} contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={s.scroll}
+      contentContainerStyle={[s.container, { paddingTop: insets.top + Spacing.xxl, paddingBottom: insets.bottom + Spacing.xxl }]}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={s.logo}>
         <View style={s.logoBox}><Text style={{ fontSize: 32 }}>🚚</Text></View>
         <Text style={s.logoText}>RotaLog</Text>
@@ -37,7 +46,7 @@ export function LoginScreen({ navigation }: LoginProps) {
 
       <Text style={s.terms}>
         Ao continuar, você aceita os{' '}
-        <Text style={{ color: Colors.green }}>Termos de Uso</Text>
+        <Text style={{ color: colors.green }}>Termos de Uso</Text>
       </Text>
     </ScrollView>
   );
@@ -46,12 +55,19 @@ export function LoginScreen({ navigation }: LoginProps) {
 // ── RECUPERAR SENHA ───────────────────────────────────────────────────────────
 type RecoverProps = NativeStackScreenProps<AuthStackParamList, 'Recover'>;
 export function RecoverScreen({ navigation }: RecoverProps) {
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const { recoverPassword, loading } = useAuth();
 
   return (
-    <ScrollView style={s.scroll} contentContainerStyle={s.container}>
+    <ScrollView
+      style={s.scroll}
+      contentContainerStyle={[s.container, { paddingTop: insets.top + Spacing.xxl, paddingBottom: insets.bottom + Spacing.xxl }]}
+      keyboardShouldPersistTaps="handled"
+    >
       {!sent ? (
         <>
           <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>🔐</Text>
@@ -64,7 +80,7 @@ export function RecoverScreen({ navigation }: RecoverProps) {
       ) : (
         <View style={s.center}>
           <Text style={{ fontSize: 64, marginBottom: 20 }}>✉️</Text>
-          <Text style={[s.h2, { color: Colors.green }]}>E-mail enviado!</Text>
+          <Text style={[s.h2, { color: colors.green }]}>E-mail enviado!</Text>
           <Text style={s.body}>Verifique sua caixa de entrada e siga as instruções.</Text>
           <Button label="VOLTAR AO LOGIN" onPress={() => navigation.navigate('Login')} full style={{ marginTop: 24 }} />
         </View>
@@ -76,16 +92,23 @@ export function RecoverScreen({ navigation }: RecoverProps) {
 // ── CADASTRO ──────────────────────────────────────────────────────────────────
 type RegisterProps = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 export function RegisterScreen({ navigation }: RegisterProps) {
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ nome:'', email:'', telefone:'', senha:'', cep:'', rua:'', numero:'', bairro:'', cidade:'' });
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
   const { register, loading } = useAuth();
 
   return (
-    <ScrollView style={s.scroll} contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={s.scroll}
+      contentContainerStyle={[s.container, { paddingTop: insets.top + Spacing.xxl, paddingBottom: insets.bottom + Spacing.xxl }]}
+      keyboardShouldPersistTaps="handled"
+    >
       {/* Progress */}
       <View style={s.progress}>
-        {[1,2].map(i => <View key={i} style={[s.progressBar, { backgroundColor: i <= step ? Colors.green : Colors.border }]} />)}
+        {[1,2].map(i => <View key={i} style={[s.progressBar, { backgroundColor: i <= step ? colors.green : colors.border }]} />)}
       </View>
       <Text style={s.section}>{step === 1 ? '— Dados básicos' : '— Endereço de entrega'}</Text>
 
@@ -109,7 +132,7 @@ export function RegisterScreen({ navigation }: RegisterProps) {
           <Button label="CRIAR CONTA" onPress={() => register({ ...form })} full loading={loading} />
           <Text style={s.terms}>
             Já tem conta?{' '}
-            <Text style={{ color: Colors.green }} onPress={() => navigation.navigate('Login')}>Entrar</Text>
+            <Text style={{ color: colors.green }} onPress={() => navigation.navigate('Login')}>Entrar</Text>
           </Text>
         </>
       )}
@@ -117,22 +140,22 @@ export function RegisterScreen({ navigation }: RegisterProps) {
   );
 }
 
-const s = StyleSheet.create({
-  scroll:       { flex: 1, backgroundColor: Colors.bg },
-  container:    { padding: Spacing.xxl, paddingTop: Spacing.xxxl },
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
+  scroll:       { flex: 1, backgroundColor: colors.bg },
+  container:    { paddingHorizontal: Spacing.xxl },
   logo:         { alignItems: 'center', marginBottom: 40 },
-  logoBox:      { width: 72, height: 72, borderRadius: 22, backgroundColor: Colors.greenGlow, borderWidth: 2, borderColor: Colors.green, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  logoText:     { color: Colors.green, fontSize: FontSize.xxl, fontWeight: '900', letterSpacing: -1 },
-  logoSub:      { color: Colors.muted, fontSize: FontSize.sm, marginTop: 6 },
-  hint:         { color: Colors.muted, fontSize: FontSize.sm, marginBottom: 20 },
+  logoBox:      { width: 72, height: 72, borderRadius: 22, backgroundColor: colors.greenGlow, borderWidth: 2, borderColor: colors.green, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  logoText:     { color: colors.green, fontSize: FontSize.xxl, fontWeight: '900', letterSpacing: -1 },
+  logoSub:      { color: colors.muted, fontSize: FontSize.sm, marginTop: 6 },
+  hint:         { color: colors.muted, fontSize: FontSize.sm, marginBottom: 20 },
   forgotWrap:   { alignItems: 'flex-end', marginBottom: 24 },
-  forgot:       { color: Colors.green, fontSize: FontSize.sm, fontWeight: '600' },
-  terms:        { textAlign: 'center', color: Colors.muted, fontSize: FontSize.xs, marginTop: 24 },
-  h2:           { color: Colors.text, fontSize: FontSize.xl, fontWeight: '800', marginBottom: 8 },
-  body:         { color: Colors.muted, fontSize: FontSize.base, lineHeight: 24, marginBottom: 24 },
+  forgot:       { color: colors.green, fontSize: FontSize.sm, fontWeight: '600' },
+  terms:        { textAlign: 'center', color: colors.muted, fontSize: FontSize.xs, marginTop: 24 },
+  h2:           { color: colors.text, fontSize: FontSize.xl, fontWeight: '800', marginBottom: 8 },
+  body:         { color: colors.muted, fontSize: FontSize.base, lineHeight: 24, marginBottom: 24 },
   center:       { alignItems: 'center' },
   progress:     { flexDirection: 'row', gap: 8, marginBottom: 24 },
   progressBar:  { flex: 1, height: 4, borderRadius: 4 },
-  section:      { color: Colors.muted, fontSize: FontSize.sm, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 20 },
+  section:      { color: colors.muted, fontSize: FontSize.sm, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 20 },
   row:          { flexDirection: 'row', gap: 10 },
 });

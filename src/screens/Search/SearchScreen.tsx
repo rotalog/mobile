@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Input } from '../../components/ui/Input';
 import { Produto } from '../../data/mock';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { api } from '../../services/api';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface Props { navigation: any; addToCart: (p: Produto) => void; }
 
 export function SearchScreen({ navigation, addToCart }: Props) {
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
   const [q, setQ]           = useState('');
   const [results, setResults] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,9 +65,9 @@ export function SearchScreen({ navigation, addToCart }: Props) {
 
   return (
     <View style={s.container}>
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + Spacing.xl }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
-          <Text style={{ color: Colors.text, fontSize: 18 }}>←</Text>
+          <Text style={{ color: colors.text, fontSize: 18 }}>←</Text>
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <Input
@@ -81,7 +86,7 @@ export function SearchScreen({ navigation, addToCart }: Props) {
           <Text style={s.emptySub}>Digite para buscar produtos ou fornecedores</Text>
         </View>
       ) : loading ? (
-        <View style={s.empty}><ActivityIndicator color={Colors.green} size="large" /></View>
+        <View style={s.empty}><ActivityIndicator color={colors.green} size="large" /></View>
       ) : (
         <FlatList
           data={results}
@@ -117,18 +122,18 @@ export function SearchScreen({ navigation, addToCart }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container:  { flex: 1, backgroundColor: Colors.bg },
-  header:     { padding: Spacing.xl, backgroundColor: Colors.surface, borderBottomWidth: 1, borderBottomColor: Colors.border, flexDirection: 'row', gap: 12, alignItems: 'center' },
-  backBtn:    { backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
+  container:  { flex: 1, backgroundColor: colors.bg },
+  header:     { paddingHorizontal: Spacing.xl, paddingBottom: Spacing.xl, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border, flexDirection: 'row', gap: 12, alignItems: 'center' },
+  backBtn:    { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: Radius.md, width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
   empty:      { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  emptySub:   { color: Colors.muted, textAlign: 'center' },
+  emptySub:   { color: colors.muted, textAlign: 'center' },
   list:       { padding: Spacing.xl, gap: 10 },
-  count:      { color: Colors.muted, fontSize: FontSize.sm, marginBottom: 12 },
-  result:     { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, flexDirection: 'row', gap: 14, alignItems: 'center' },
-  resultIcon: { backgroundColor: Colors.surface, borderRadius: Radius.md, padding: 10 },
-  name:       { color: Colors.text, fontWeight: '700', fontSize: FontSize.base },
-  sup:        { color: Colors.muted, fontSize: FontSize.sm },
-  price:      { color: Colors.green, fontWeight: '800', fontSize: FontSize.base },
-  addBtn:     { backgroundColor: Colors.green, borderRadius: 10, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  count:      { color: colors.muted, fontSize: FontSize.sm, marginBottom: 12 },
+  result:     { backgroundColor: colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', gap: 14, alignItems: 'center' },
+  resultIcon: { backgroundColor: colors.surface, borderRadius: Radius.md, padding: 10 },
+  name:       { color: colors.text, fontWeight: '700', fontSize: FontSize.base },
+  sup:        { color: colors.muted, fontSize: FontSize.sm },
+  price:      { color: colors.green, fontWeight: '800', fontSize: FontSize.base },
+  addBtn:     { backgroundColor: colors.green, borderRadius: 10, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
 });

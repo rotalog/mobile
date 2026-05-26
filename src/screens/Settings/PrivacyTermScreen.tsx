@@ -1,9 +1,12 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
  
 export function PrivacyScreen({ navigation }: { navigation: any }) {
+  const { colors } = useTheme();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={s.container}>
       <TopBar title="Privacidade" onBack={() => navigation.goBack()} />
@@ -52,11 +55,11 @@ const SECTIONS = [
   },
 ];
  
-const s = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: Colors.bg },
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
+  container:    { flex: 1, backgroundColor: colors.bg },
   list:         { padding: Spacing.xl, gap: 10 },
-  card:         { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  version:      { color: Colors.muted, fontSize: FontSize.sm, textAlign: 'center' },
-  sectionTitle: { color: Colors.text, fontWeight: '800', fontSize: FontSize.base, marginBottom: 8 },
-  sectionBody:  { color: Colors.muted, fontSize: FontSize.sm, lineHeight: 22 },
+  card:         { backgroundColor: colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: colors.border },
+  version:      { color: colors.muted, fontSize: FontSize.sm, textAlign: 'center' },
+  sectionTitle: { color: colors.text, fontWeight: '800', fontSize: FontSize.base, marginBottom: 8 },
+  sectionBody:  { color: colors.muted, fontSize: FontSize.sm, lineHeight: 22 },
 });

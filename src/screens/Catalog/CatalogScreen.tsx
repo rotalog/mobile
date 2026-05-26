@@ -4,7 +4,8 @@ import { TopBar } from '../../components/layout/TopBar';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { Produto } from '../../data/mock';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { api } from '../../services/api';
 
 const CATS = ['Todos', 'Carnes', 'Construção', 'Verduras', 'Grãos', 'Aves', 'Legumes'];
@@ -12,6 +13,8 @@ const CATS = ['Todos', 'Carnes', 'Construção', 'Verduras', 'Grãos', 'Aves', '
 interface Props { navigation: any; addToCart: (p: Produto) => void; }
 
 export function CatalogScreen({ navigation, addToCart }: Props) {
+  const { colors } = useTheme();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
   const [busca, setBusca] = useState('');
   const [cat, setCat]     = useState('Todos');
   const [produtos, setProdutos] = useState<any[]>([]);
@@ -82,7 +85,7 @@ export function CatalogScreen({ navigation, addToCart }: Props) {
       </View>
 
       {loading ? (
-        <View style={s.center}><ActivityIndicator color={Colors.green} size="large" /></View>
+        <View style={s.center}><ActivityIndicator color={colors.green} size="large" /></View>
       ) : (
         <FlatList
           data={filtrados}
@@ -92,7 +95,7 @@ export function CatalogScreen({ navigation, addToCart }: Props) {
           columnWrapperStyle={{ gap: 12 }}
           ListEmptyComponent={
             <View style={s.center}>
-              <Text style={{ color: Colors.muted }}>Nenhum produto encontrado.</Text>
+              <Text style={{ color: colors.muted }}>Nenhum produto encontrado.</Text>
             </View>
           }
           renderItem={({ item: p }) => (
@@ -116,19 +119,19 @@ export function CatalogScreen({ navigation, addToCart }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container:      { flex: 1, backgroundColor: Colors.bg },
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
+  container:      { flex: 1, backgroundColor: colors.bg },
   filters:        { padding: Spacing.xl, paddingBottom: 0 },
-  chip:           { backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 6 },
-  chipActive:     { backgroundColor: Colors.green, borderColor: Colors.green },
-  chipText:       { color: Colors.muted, fontSize: FontSize.xs, fontWeight: '700' },
+  chip:           { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: 6 },
+  chipActive:     { backgroundColor: colors.green, borderColor: colors.green },
+  chipText:       { color: colors.muted, fontSize: FontSize.xs, fontWeight: '700' },
   chipTextActive: { color: '#0A0C0E' },
   grid:           { padding: Spacing.xl, gap: 12 },
-  card:           { flex: 1, backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  cardImg:        { alignItems: 'center', backgroundColor: Colors.surface, borderRadius: Radius.md, paddingVertical: 12, marginBottom: 8 },
-  cardName:       { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 2 },
-  cardSup:        { color: Colors.muted, fontSize: FontSize.xs, marginBottom: 6 },
-  cardPrice:      { color: Colors.green, fontWeight: '800', fontSize: FontSize.base },
-  cardUnit:       { color: Colors.muted, fontSize: FontSize.xs },
+  card:           { flex: 1, backgroundColor: colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: colors.border },
+  cardImg:        { alignItems: 'center', backgroundColor: colors.surface, borderRadius: Radius.md, paddingVertical: 12, marginBottom: 8 },
+  cardName:       { color: colors.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 2 },
+  cardSup:        { color: colors.muted, fontSize: FontSize.xs, marginBottom: 6 },
+  cardPrice:      { color: colors.green, fontWeight: '800', fontSize: FontSize.base },
+  cardUnit:       { color: colors.muted, fontSize: FontSize.xs },
   center:         { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
 });

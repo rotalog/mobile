@@ -4,9 +4,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Colors, FontSize } from '../theme';
+import { ColorPalette, FontSize } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useTheme } from '../context/ThemeContext';
 
 // ── Screens ───────────────────────────────────────────────────────────────────
 import { LoginScreen, RecoverScreen, RegisterScreen } from '../screens/Auth/AuthScreens';
@@ -107,6 +108,9 @@ const TABS = [
 
 function CustomTabBar({ state, navigation }: any) {
   const { count } = useCart();
+  const { colors } = useTheme();
+  const tb = React.useMemo(() => createTabStyles(colors), [colors]);
+
   return (
     <View style={tb.bar}>
       {state.routes.map((route: any, index: number) => {
@@ -169,12 +173,12 @@ export function AppNavigator() {
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const tb = StyleSheet.create({
-  bar:         { flexDirection: 'row', backgroundColor: Colors.surface, borderTopWidth: 1, borderTopColor: Colors.border, paddingBottom: 12, paddingTop: 8 },
+const createTabStyles = (colors: ColorPalette) => StyleSheet.create({
+  bar:         { flexDirection: 'row', backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border, paddingBottom: 12, paddingTop: 8 },
   tab:         { flex: 1, alignItems: 'center', gap: 4 },
-  label:       { fontSize: FontSize.xs, color: Colors.muted, fontWeight: '500' },
-  labelActive: { color: Colors.green, fontWeight: '800' },
-  indicator:   { width: 24, height: 3, backgroundColor: Colors.green, borderRadius: 2 },
-  badge:       { position: 'absolute', top: -4, right: -6, backgroundColor: Colors.green, borderRadius: 8, width: 16, height: 16, alignItems: 'center', justifyContent: 'center' },
-  badgeTxt:    { color: '#0A0C0E', fontSize: 9, fontWeight: '900' },
+  label:       { fontSize: FontSize.xs, color: colors.muted, fontWeight: '500' },
+  labelActive: { color: colors.green, fontWeight: '800' },
+  indicator:   { width: 24, height: 3, backgroundColor: colors.green, borderRadius: 2 },
+  badge:       { position: 'absolute', top: -4, right: -6, backgroundColor: colors.green, borderRadius: 8, width: 16, height: 16, alignItems: 'center', justifyContent: 'center' },
+  badgeTxt:    { color: colors.onPrimary, fontSize: 9, fontWeight: '900' },
 });

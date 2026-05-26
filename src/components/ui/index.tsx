@@ -1,38 +1,47 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
-// ── Badge ─────────────────────────────────────────────────────────────────────
 interface BadgeProps { label: string; color?: string; }
-export function Badge({ label, color = Colors.green }: BadgeProps) {
+export function Badge({ label, color }: BadgeProps) {
+  const { colors } = useTheme();
+  const badgeColor = color ?? colors.green;
+
   return (
-    <View style={[styles.badge, { backgroundColor: `${color}22`, borderColor: `${color}44` }]}>
-      <Text style={[styles.badgeText, { color }]}>{label}</Text>
+    <View style={[staticStyles.badge, { backgroundColor: `${badgeColor}22`, borderColor: `${badgeColor}44` }]}>
+      <Text style={[staticStyles.badgeText, { color: badgeColor }]}>{label}</Text>
     </View>
   );
 }
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
 interface AvatarProps { size?: number; letter?: string; color?: string; }
-export function Avatar({ size = 44, letter = 'U', color = Colors.green }: AvatarProps) {
+export function Avatar({ size = 44, letter = 'U', color }: AvatarProps) {
+  const { colors } = useTheme();
+  const avatarColor = color ?? colors.green;
+
   return (
-    <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2, backgroundColor: `${color}22`, borderColor: color }]}>
-      <Text style={[styles.avatarText, { fontSize: size * 0.4, color }]}>{letter}</Text>
+    <View style={[staticStyles.avatar, { width: size, height: size, borderRadius: size / 2, backgroundColor: `${avatarColor}22`, borderColor: avatarColor }]}>
+      <Text style={[staticStyles.avatarText, { fontSize: size * 0.4, color: avatarColor }]}>{letter}</Text>
     </View>
   );
 }
 
-// ── Rating ────────────────────────────────────────────────────────────────────
 interface RatingProps { value: number; }
 export function Rating({ value }: RatingProps) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   return <Text style={styles.rating}>★ {value}</Text>;
 }
 
-// ── Divider ───────────────────────────────────────────────────────────────────
 interface DividerProps { label?: string; }
 export function Divider({ label }: DividerProps) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   return (
-    <View style={styles.divider}>
+    <View style={staticStyles.divider}>
       <View style={styles.dividerLine} />
       {label && <Text style={styles.dividerLabel}>{label}</Text>}
       <View style={styles.dividerLine} />
@@ -40,13 +49,16 @@ export function Divider({ label }: DividerProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const staticStyles = StyleSheet.create({
   badge:       { borderWidth: 1, borderRadius: Radius.full, paddingHorizontal: Spacing.sm, paddingVertical: 2, alignSelf: 'flex-start' },
   badgeText:   { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 0.3 },
   avatar:      { borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   avatarText:  { fontWeight: '800' },
-  rating:      { color: Colors.warning, fontSize: FontSize.sm, fontWeight: '700' },
   divider:     { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginVertical: Spacing.lg },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
-  dividerLabel:{ color: Colors.muted, fontSize: FontSize.sm },
+});
+
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
+  rating:      { color: colors.warning, fontSize: FontSize.sm, fontWeight: '700' },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerLabel:{ color: colors.muted, fontSize: FontSize.sm },
 });

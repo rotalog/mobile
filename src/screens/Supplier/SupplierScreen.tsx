@@ -3,12 +3,15 @@ import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-nat
 import { TopBar } from '../../components/layout/TopBar';
 import { Button } from '../../components/ui/Button';
 import { Produto } from '../../data/mock';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { api } from '../../services/api';
 
 interface Props { navigation: any; route: any; addToCart: (p: Produto) => void; }
 
 export function SupplierScreen({ navigation, route, addToCart }: Props) {
+  const { colors } = useTheme();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
   const fornecedor = route?.params?.fornecedor ?? {};
   const supplierId = fornecedor.id;
 
@@ -19,7 +22,7 @@ export function SupplierScreen({ navigation, route, addToCart }: Props) {
   const distancia = fornecedor.distance  ?? fornecedor.distancia ?? '-';
   const tempo     = fornecedor.deliveryTime ?? fornecedor.tempo  ?? '-';
   const img       = fornecedor.img       ?? '🏪';
-  const cor       = fornecedor.cor       ?? Colors.green;
+  const cor       = fornecedor.cor       ?? colors.green;
 
   const [produtos, setProdutos] = useState<any[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -73,7 +76,7 @@ export function SupplierScreen({ navigation, route, addToCart }: Props) {
           </View>
           {tempo !== '-' && (
             <View style={s.etaBadge}>
-              <Text style={s.etaTxt}>🕐 Entrega estimada: <Text style={{ color: Colors.text, fontWeight: '700' }}>{tempo}</Text></Text>
+              <Text style={s.etaTxt}>🕐 Entrega estimada: <Text style={{ color: colors.text, fontWeight: '700' }}>{tempo}</Text></Text>
             </View>
           )}
         </View>
@@ -81,9 +84,9 @@ export function SupplierScreen({ navigation, route, addToCart }: Props) {
         {/* Produtos */}
         <Text style={s.section}>— PRODUTOS DISPONÍVEIS</Text>
         {loading ? (
-          <ActivityIndicator color={Colors.green} style={{ marginTop: 20 }} />
+          <ActivityIndicator color={colors.green} style={{ marginTop: 20 }} />
         ) : produtos.length === 0 ? (
-          <Text style={{ color: Colors.muted, textAlign: 'center', marginTop: 20 }}>
+          <Text style={{ color: colors.muted, textAlign: 'center', marginTop: 20 }}>
             Nenhum produto disponível.
           </Text>
         ) : (
@@ -109,20 +112,20 @@ export function SupplierScreen({ navigation, route, addToCart }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
   scroll:    { padding: Spacing.xl, gap: 16 },
   hero:      { alignItems: 'center', borderRadius: Radius.xl, padding: Spacing.xl },
-  name:      { color: Colors.text, fontSize: FontSize.xl, fontWeight: '900', marginBottom: 4 },
-  cat:       { color: Colors.muted, marginBottom: 12 },
+  name:      { color: colors.text, fontSize: FontSize.xl, fontWeight: '900', marginBottom: 4 },
+  cat:       { color: colors.muted, marginBottom: 12 },
   stats:     { flexDirection: 'row', gap: 32, marginBottom: 12 },
-  statVal:   { color: Colors.green, fontWeight: '900', fontSize: FontSize.lg, textAlign: 'center' },
-  statKey:   { color: Colors.muted, fontSize: FontSize.xs },
-  etaBadge:  { backgroundColor: Colors.card, borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: 10, borderWidth: 1, borderColor: Colors.border },
-  etaTxt:    { color: Colors.muted, fontSize: FontSize.sm },
-  section:   { color: Colors.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
+  statVal:   { color: colors.green, fontWeight: '900', fontSize: FontSize.lg, textAlign: 'center' },
+  statKey:   { color: colors.muted, fontSize: FontSize.xs },
+  etaBadge:  { backgroundColor: colors.card, borderRadius: Radius.md, paddingHorizontal: Spacing.md, paddingVertical: 10, borderWidth: 1, borderColor: colors.border },
+  etaTxt:    { color: colors.muted, fontSize: FontSize.sm },
+  section:   { color: colors.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
   grid:      { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  prodCard:  { flex: 1, minWidth: '45%', backgroundColor: Colors.card, borderRadius: Radius.md, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  prodName:  { color: Colors.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 4 },
-  prodPrice: { color: Colors.green, fontWeight: '800', fontSize: FontSize.sm },
+  prodCard:  { flex: 1, minWidth: '45%', backgroundColor: colors.card, borderRadius: Radius.md, padding: Spacing.md, borderWidth: 1, borderColor: colors.border },
+  prodName:  { color: colors.text, fontWeight: '700', fontSize: FontSize.sm, marginBottom: 4 },
+  prodPrice: { color: colors.green, fontWeight: '800', fontSize: FontSize.sm },
 });

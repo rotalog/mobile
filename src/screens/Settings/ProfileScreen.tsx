@@ -7,9 +7,9 @@ import { TopBar } from '../../components/layout/TopBar';
 import { Avatar, Badge } from '../../components/ui/index';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { Colors, FontSize, Radius, Spacing } from '../../theme';
+import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/api';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Endereco {
   id: number;
@@ -21,67 +21,91 @@ interface Endereco {
 }
 
 export function ProfileScreen({ navigation }: { navigation: any }) {
-  const { user, logout } = useAuth();
+  const { colors } = useTheme();
+  const s = React.useMemo(() => createStyles(colors), [colors]);
+  const { user } = useAuth();
 
-  const [editing, setEditing]   = useState(false);
-  const [nome, setNome]         = useState(user?.name ?? '');
-  const [email, setEmail]       = useState(user?.email ?? '');
+  const [editing, setEditing] = useState(false);
+  const [nome, setNome] = useState(user?.name ?? '');
+  const [email, setEmail] = useState(user?.email ?? '');
   const [telefone, setTelefone] = useState(user?.telefone ?? '');
-  const [savingPerfil, setSavingPerfil] = useState(false);
 
   const [enderecos, setEnderecos] = useState<Endereco[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [novoLabel, setNovoLabel]   = useState('');
-  const [novoRua, setNovoRua]       = useState('');
-  const [novoBairro, setNovoBairro] = useState('');
-  const [novoCidade, setNovoCidade] = useState('Manaus - AM');
-  const [savingAddr, setSavingAddr] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
+  const [addrLabel, setAddrLabel] = useState('');
+  const [addrRua, setAddrRua] = useState('');
+  const [addrBairro, setAddrBairro] = useState('');
+  const [addrCidade, setAddrCidade] = useState('Manaus - AM');
 
-  const handleSavePerfil = async () => {
-    setSavingPerfil(true);
-    try {
-      await api.put('/api/v1/users/me', { name: nome, email, telefone });
-      setEditing(false);
-      Alert.alert('Sucesso', 'Dados atualizados!');
-    } catch {
-      Alert.alert('Erro', 'Não foi possível atualizar os dados. Tente novamente.');
-    } finally {
-      setSavingPerfil(false);
-    }
-  };
+  const primeiraLetra = (nome || user?.name || 'U').charAt(0).toUpperCase();
 
-  const handleAddEndereco = async () => {
-    if (!novoLabel || !novoRua || !novoBairro) {
-      Alert.alert('Atenção', 'Preencha todos os campos.');
+  const handleSavePerfil = () => {
+    if (!nome.trim() || !email.trim()) {
+      Alert.alert('Atenção', 'Informe pelo menos nome e e-mail.');
       return;
     }
-    setSavingAddr(true);
-    try {
-      const payload = { label: novoLabel, rua: novoRua, bairro: novoBairro, cidade: novoCidade };
-      const { data } = await api.post('/api/v1/addresses', payload);
-      const novo: Endereco = {
-        id: data.id ?? Date.now(),
-        label: novoLabel,
-        rua: novoRua,
-        bairro: novoBairro,
-        cidade: novoCidade,
-        principal: false,
-      };
-      setEnderecos(prev => [...prev, novo]);
-      setNovoLabel(''); setNovoRua(''); setNovoBairro(''); setNovoCidade('Manaus - AM');
-      setModalVisible(false);
-    } catch {
-      Alert.alert('Erro', 'Não foi possível salvar o endereço.');
-    } finally {
-      setSavingAddr(false);
+
+    setNome(nome.trim());
+    setEmail(email.trim());
+    setTelefone(telefone.trim());
+    setEditing(false);
+  };
+
+  const resetAddressForm = () => {
+    setEditingAddressId(null);
+    setAddrLabel('');
+    setAddrRua('');
+    setAddrBairro('');
+    setAddrCidade('Manaus - AM');
+  };
+
+  const openNewAddress = () => {
+    resetAddressForm();
+    setModalVisible(true);
+  };
+
+  const openEditAddress = (endereco: Endereco) => {
+    setEditingAddressId(endereco.id);
+    setAddrLabel(endereco.label);
+    setAddrRua(endereco.rua);
+    setAddrBairro(endereco.bairro);
+    setAddrCidade(endereco.cidade);
+    setModalVisible(true);
+  };
+
+  const closeAddressModal = () => {
+    setModalVisible(false);
+    resetAddressForm();
+  };
+
+  const handleSaveEndereco = () => {
+    if (!addrLabel.trim() || !addrRua.trim() || !addrBairro.trim()) {
+      Alert.alert('Atenção', 'Preencha apelido, rua e bairro.');
+      return;
     }
+
+    const endereco: Endereco = {
+      id: editingAddressId ?? Date.now(),
+      label: addrLabel.trim(),
+      rua: addrRua.trim(),
+      bairro: addrBairro.trim(),
+      cidade: addrCidade.trim() || 'Manaus - AM',
+      principal: enderecos.length === 0 || enderecos.some(e => e.id === editingAddressId && e.principal),
+    };
+
+    setEnderecos(prev => {
+      if (editingAddressId) {
+        return prev.map(e => e.id === editingAddressId ? { ...endereco, principal: e.principal } : e);
+      }
+      return [...prev, endereco];
+    });
+    closeAddressModal();
   };
 
   const handleSetPrincipal = (id: number) => {
     setEnderecos(prev => prev.map(e => ({ ...e, principal: e.id === id })));
   };
-
-  const primeiraLetra = (nome || user?.name || 'U').charAt(0).toUpperCase();
 
   return (
     <View style={s.container}>
@@ -93,21 +117,18 @@ export function ProfileScreen({ navigation }: { navigation: any }) {
             onPress={() => editing ? handleSavePerfil() : setEditing(true)}
             style={s.editBtn}
           >
-            <Text style={s.editBtnTxt}>{editing ? (savingPerfil ? '...' : 'Salvar') : 'Editar'}</Text>
+            <Text style={s.editBtnTxt}>{editing ? 'Salvar' : 'Editar'}</Text>
           </TouchableOpacity>
         }
       />
 
       <ScrollView contentContainerStyle={s.list}>
-
-        {/* Avatar */}
         <View style={s.avatarWrap}>
           <Avatar size={80} letter={primeiraLetra} />
-          <Text style={s.name}>{nome || user?.name}</Text>
+          <Text style={s.name}>{nome || user?.name || 'Usuário'}</Text>
           <Text style={s.since}>{user?.role === 'SUPPLIER' ? 'Fornecedor' : 'Comprador'}</Text>
         </View>
 
-        {/* Dados pessoais */}
         <Text style={s.section}>DADOS PESSOAIS</Text>
         {editing ? (
           <View style={s.dataCard}>
@@ -117,11 +138,11 @@ export function ProfileScreen({ navigation }: { navigation: any }) {
             <Input value={email} onChangeText={setEmail} placeholder="Seu e-mail" keyboardType="email-address" autoCapitalize="none" />
             <Text style={s.inputLabel}>Telefone</Text>
             <Input value={telefone} onChangeText={setTelefone} placeholder="(00) 00000-0000" keyboardType="phone-pad" />
-            <Button label="SALVAR ALTERAÇÕES" onPress={handleSavePerfil} loading={savingPerfil} full />
+            <Button label="SALVAR ALTERAÇÕES" onPress={handleSavePerfil} full />
           </View>
         ) : (
           <View style={s.dataCard}>
-            {([['Nome', nome || user?.name], ['E-mail', email || user?.email], ['Telefone', telefone || user?.telefone || '-']] as [string, string][]).map(([k, v]) => (
+            {([['Nome', nome || user?.name || '-'], ['E-mail', email || user?.email || '-'], ['Telefone', telefone || user?.telefone || '-']] as [string, string][]).map(([k, v]) => (
               <View key={k} style={s.dataRow}>
                 <Text style={s.dataKey}>{k}</Text>
                 <Text style={s.dataVal}>{v}</Text>
@@ -130,62 +151,57 @@ export function ProfileScreen({ navigation }: { navigation: any }) {
           </View>
         )}
 
-        {/* Endereços */}
         <View style={s.addrHeader}>
           <Text style={s.section}>ENDEREÇOS</Text>
-          <TouchableOpacity style={s.addBtn} onPress={() => setModalVisible(true)}>
-            <Text style={{ color: '#0A0C0E', fontWeight: '800', fontSize: FontSize.xs }}>+ Novo</Text>
+          <TouchableOpacity style={s.addBtn} onPress={openNewAddress}>
+            <Text style={s.addBtnText}>+ Novo</Text>
           </TouchableOpacity>
         </View>
 
         {enderecos.length === 0 && (
-          <Text style={{ color: Colors.muted, fontSize: FontSize.sm, textAlign: 'center', marginTop: 8 }}>
-            Nenhum endereço cadastrado.
-          </Text>
+          <Text style={s.emptyAddress}>Nenhum endereço cadastrado.</Text>
         )}
 
         {enderecos.map(e => (
-          <TouchableOpacity
-            key={e.id}
-            style={[s.addrCard, e.principal && s.addrCardPrincipal]}
-            onPress={() => handleSetPrincipal(e.id)}
-            activeOpacity={0.8}
-          >
-            <View style={s.addrTop}>
-              <Text style={s.addrLabel}>{e.label}</Text>
-              {e.principal && <Badge label="Principal" />}
-            </View>
-            <Text style={s.addrRua}>{e.rua}</Text>
-            <Text style={s.addrSub}>{e.bairro} · {e.cidade}</Text>
-            {!e.principal && (
-              <Text style={s.addrAction}>Toque para definir como principal</Text>
-            )}
-          </TouchableOpacity>
+          <View key={e.id} style={[s.addrCard, e.principal && s.addrCardPrincipal]}>
+            <TouchableOpacity onPress={() => handleSetPrincipal(e.id)} activeOpacity={0.8}>
+              <View style={s.addrTop}>
+                <Text style={s.addrLabel}>{e.label}</Text>
+                {e.principal && <Badge label="Principal" />}
+              </View>
+              <Text style={s.addrRua}>{e.rua}</Text>
+              <Text style={s.addrSub}>{e.bairro} · {e.cidade}</Text>
+              {!e.principal && (
+                <Text style={s.addrAction}>Toque para definir como principal</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={s.addrEditBtn} onPress={() => openEditAddress(e)}>
+              <Text style={s.addrEditText}>Editar endereço</Text>
+            </TouchableOpacity>
+          </View>
         ))}
-
       </ScrollView>
 
-      {/* Modal novo endereço */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={s.modalOverlay}>
           <View style={s.modalCard}>
-            <Text style={s.modalTitle}>Novo endereço</Text>
+            <Text style={s.modalTitle}>{editingAddressId ? 'Editar endereço' : 'Novo endereço'}</Text>
 
             <Text style={s.inputLabel}>Apelido (ex: Casa, Trabalho)</Text>
-            <Input value={novoLabel} onChangeText={setNovoLabel} placeholder="Casa" />
+            <Input value={addrLabel} onChangeText={setAddrLabel} placeholder="Casa" />
 
             <Text style={s.inputLabel}>Rua e número</Text>
-            <Input value={novoRua} onChangeText={setNovoRua} placeholder="R. das Flores, 123" />
+            <Input value={addrRua} onChangeText={setAddrRua} placeholder="R. das Flores, 123" />
 
             <Text style={s.inputLabel}>Bairro</Text>
-            <Input value={novoBairro} onChangeText={setNovoBairro} placeholder="Centro" />
+            <Input value={addrBairro} onChangeText={setAddrBairro} placeholder="Centro" />
 
             <Text style={s.inputLabel}>Cidade</Text>
-            <Input value={novoCidade} onChangeText={setNovoCidade} placeholder="Manaus - AM" />
+            <Input value={addrCidade} onChangeText={setAddrCidade} placeholder="Manaus - AM" />
 
             <View style={s.modalBtns}>
-              <Button label="CANCELAR" onPress={() => setModalVisible(false)} variant="ghost" style={{ flex: 1 }} />
-              <Button label="SALVAR" onPress={handleAddEndereco} loading={savingAddr} style={{ flex: 1 }} />
+              <Button label="CANCELAR" onPress={closeAddressModal} variant="ghost" style={{ flex: 1 }} />
+              <Button label="SALVAR" onPress={handleSaveEndereco} style={{ flex: 1 }} />
             </View>
           </View>
         </View>
@@ -194,31 +210,35 @@ export function ProfileScreen({ navigation }: { navigation: any }) {
   );
 }
 
-const s = StyleSheet.create({
-  container:         { flex: 1, backgroundColor: Colors.bg },
+const createStyles = (colors: ColorPalette) => StyleSheet.create({
+  container:         { flex: 1, backgroundColor: colors.bg },
   list:              { padding: Spacing.xl, gap: 10 },
   avatarWrap:        { alignItems: 'center', marginBottom: 8 },
-  name:              { color: Colors.text, fontWeight: '800', fontSize: FontSize.xl, marginTop: 12 },
-  since:             { color: Colors.muted, fontSize: FontSize.sm },
-  editBtn:           { backgroundColor: `${Colors.green}22`, borderWidth: 1, borderColor: `${Colors.green}44`, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 },
-  editBtnTxt:        { color: Colors.green, fontWeight: '800', fontSize: FontSize.xs },
-  section:           { color: Colors.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
-  inputLabel:        { color: Colors.muted, fontSize: FontSize.xs, fontWeight: '700', marginBottom: 4, marginTop: 4 },
-  dataCard:          { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border, gap: 4 },
-  dataRow:           { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  dataKey:           { color: Colors.muted, fontSize: FontSize.sm },
-  dataVal:           { color: Colors.text, fontWeight: '600', fontSize: FontSize.sm },
+  name:              { color: colors.text, fontWeight: '800', fontSize: FontSize.xl, marginTop: 12 },
+  since:             { color: colors.muted, fontSize: FontSize.sm },
+  editBtn:           { backgroundColor: `${colors.green}22`, borderWidth: 1, borderColor: `${colors.green}44`, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 },
+  editBtnTxt:        { color: colors.green, fontWeight: '800', fontSize: FontSize.xs },
+  section:           { color: colors.muted, fontSize: FontSize.xs, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' },
+  inputLabel:        { color: colors.muted, fontSize: FontSize.xs, fontWeight: '700', marginBottom: 4, marginTop: 4 },
+  dataCard:          { backgroundColor: colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: colors.border, gap: 4 },
+  dataRow:           { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border },
+  dataKey:           { color: colors.muted, fontSize: FontSize.sm },
+  dataVal:           { color: colors.text, fontWeight: '600', fontSize: FontSize.sm, flex: 1, textAlign: 'right' },
   addrHeader:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  addBtn:            { backgroundColor: Colors.green, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4 },
-  addrCard:          { backgroundColor: Colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  addrCardPrincipal: { borderColor: Colors.green },
+  addBtn:            { backgroundColor: colors.green, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4 },
+  addBtnText:        { color: colors.onPrimary, fontWeight: '800', fontSize: FontSize.xs },
+  emptyAddress:      { color: colors.muted, fontSize: FontSize.sm, textAlign: 'center', marginTop: 8 },
+  addrCard:          { backgroundColor: colors.card, borderRadius: Radius.lg, padding: Spacing.md, borderWidth: 1, borderColor: colors.border },
+  addrCardPrincipal: { borderColor: colors.green },
   addrTop:           { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  addrLabel:         { fontWeight: '800', color: Colors.text, fontSize: FontSize.base },
-  addrRua:           { color: Colors.muted, fontSize: FontSize.sm },
-  addrSub:           { color: Colors.muted, fontSize: FontSize.xs },
-  addrAction:        { color: Colors.green, fontSize: FontSize.xs, marginTop: 6, fontWeight: '600' },
+  addrLabel:         { fontWeight: '800', color: colors.text, fontSize: FontSize.base },
+  addrRua:           { color: colors.muted, fontSize: FontSize.sm },
+  addrSub:           { color: colors.muted, fontSize: FontSize.xs },
+  addrAction:        { color: colors.green, fontSize: FontSize.xs, marginTop: 6, fontWeight: '600' },
+  addrEditBtn:       { marginTop: 10, alignSelf: 'flex-start' },
+  addrEditText:      { color: colors.green, fontSize: FontSize.xs, fontWeight: '800' },
   modalOverlay:      { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  modalCard:         { backgroundColor: Colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.xl, gap: 4 },
-  modalTitle:        { color: Colors.text, fontWeight: '800', fontSize: FontSize.lg, marginBottom: 8 },
+  modalCard:         { backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.xl, gap: 4 },
+  modalTitle:        { color: colors.text, fontWeight: '800', fontSize: FontSize.lg, marginBottom: 8 },
   modalBtns:         { flexDirection: 'row', gap: 12, marginTop: 8 },
 });
