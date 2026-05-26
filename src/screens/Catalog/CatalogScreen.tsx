@@ -49,6 +49,7 @@ export function CatalogScreen({ navigation, addToCart }: Props) {
             <View style={s.center}>
               <Text style={{ color: colors.muted }}>Nenhum produto encontrado.</Text>
             </View>
+<TouchableOpacity onPress={() => {}}> 
             {p.estoque
               ? <Button label="+ Adicionar" onPress={() => addToCart(p)} sm full />
               : <Button label="Indisponível" onPress={() => {}} sm full disabled />
