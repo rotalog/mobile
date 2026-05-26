@@ -37,6 +37,7 @@ const STATUS_COPY: Record<DeliveryStatus, { title: string; sub: string; badge: s
   },
 };
 
+// ── Component ─────────────────────────────────────────────────────────────────
 export function DeliveryScreen({ navigation }: { navigation: any }) {
   const { colors } = useTheme();
   const s = React.useMemo(() => createStyles(colors), [colors]);
@@ -62,6 +63,7 @@ export function DeliveryScreen({ navigation }: { navigation: any }) {
         <Text style={{ fontSize: 48 }}>
           {latestOrder ? STEPS[STATUS_INDEX[latestOrder.status]].icon : '🗺️'}
         </Text>
+        {fase >= 2 && <Text style={s.etaBar}>ETA: {eta}</Text>}
       </View>
 
       <ScrollView contentContainerStyle={s.list}>

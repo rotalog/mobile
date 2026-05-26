@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Input } from '../../components/ui/Input';
 import { Produto } from '../../data/mock';
 import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
@@ -73,7 +73,7 @@ export function SearchScreen({ navigation, addToCart }: Props) {
           <Input
             placeholder="Buscar produtos, fornecedores..."
             value={q}
-            onChangeText={handleSearch}
+            onChangeText={setQ}
             containerStyle={{ marginBottom: 0 }}
             autoFocus
           />
@@ -90,18 +90,16 @@ export function SearchScreen({ navigation, addToCart }: Props) {
       ) : (
         <FlatList
           data={results}
-          keyExtractor={i => `${i.id}-${i.fornecedor}`}
+          keyExtractor={i => String(i.id)}
           contentContainerStyle={s.list}
           ListHeaderComponent={
             <Text style={s.count}>{results.length} resultado{results.length !== 1 ? 's' : ''} para "{q}"</Text>
           }
           ListEmptyComponent={
-            searched ? (
-              <View style={s.empty}>
-                <Text style={{ fontSize: 40, marginBottom: 12 }}>🔍</Text>
-                <Text style={s.emptySub}>Nenhum resultado encontrado</Text>
-              </View>
-            ) : null
+            <View style={s.empty}>
+              <Text style={{ fontSize: 40, marginBottom: 12 }}>🔍</Text>
+              <Text style={s.emptySub}>Nenhum resultado encontrado</Text>
+            </View>
           }
           renderItem={({ item: p }) => (
             <TouchableOpacity style={s.result} onPress={() => navigation.navigate('Product', { produto: p })}>

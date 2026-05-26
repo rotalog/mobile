@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, FlatList } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../navigation/AppNavigator';
 import { Badge, Avatar, Rating } from '../../components/ui/index';
@@ -17,29 +17,14 @@ export function HomeScreen({ navigation }: Props) {
   const s = React.useMemo(() => createStyles(colors), [colors]);
   const [catAtiva, setCatAtiva] = useState('Todos');
   const [busca, setBusca] = useState('');
-  const [fornecedores, setFornecedores] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(false);
+  const { user } = useAuth();
 
-  useEffect(() => {
-    async function loadSuppliers() {
-      try {
-        setErro(false);
-        const { data } = await api.get('/api/v1/suppliers');
-        setFornecedores(Array.isArray(data) ? data : data.content ?? data.suppliers ?? []);
-      } catch {
-        setErro(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadSuppliers();
-  }, []);
 
-  const fornFiltrados = fornecedores.filter(f =>
-    (catAtiva === 'Todos' || (f.category ?? f.categoria ?? '').includes(catAtiva)) &&
-    (f.name ?? f.nome ?? '').toLowerCase().includes(busca.toLowerCase())
+  const fornFiltrados = FORNECEDORES.filter(f =>
+    (catAtiva === 'Todos' || f.categoria.includes(catAtiva)) &&
+    f.nome.toLowerCase().includes(busca.toLowerCase())
   );
+
 
   return (
     <View style={s.container}>
@@ -48,9 +33,9 @@ export function HomeScreen({ navigation }: Props) {
         <View style={s.headerTop}>
           <View>
             <Text style={s.location}>📍 R. das Acácias, 45</Text>
-            <Text style={s.greeting}>Bom dia! 👋</Text>
+            <Text style={s.greeting}>Olá, {user?.name ?? 'Usuário'}! 👋</Text>
           </View>
-          <Avatar letter="R" size={40} />
+         <Avatar letter={(user?.name ?? 'U').charAt(0)} size={40} />
         </View>
 
         {/* Search bar */}
@@ -121,12 +106,18 @@ export function HomeScreen({ navigation }: Props) {
                     </View>
                   </View>
                 </View>
-                {badge && <View style={{ marginTop: 10 }}><Badge label={badge} /></View>}
-              </TouchableOpacity>
-            );
-          }}
-        />
-      )}
+                <Text style={s.cardCat}>{f.categoria}</Text>
+                <View style={s.cardMeta}>
+                  <Text style={s.metaText}>⏱ {f.tempo}</Text>
+                  <Text style={s.metaText}>📍 {f.distancia}</Text>
+                  <Text style={s.metaPrice}>{f.preco_medio}</Text>
+                </View>
+              </View>
+            </View>
+            {f.badge && <View style={{ marginTop: 10 }}><Badge label={f.badge} /></View>}
+          </TouchableOpacity>
+        )}
+      />
     </View>
   );
 }

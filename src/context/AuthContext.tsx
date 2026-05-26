@@ -10,9 +10,12 @@ export interface User {
   supplierId: string | null;
   telefone?: string;
 }
+
 interface AuthContextData {
   user: User | null;
   loading: boolean;
+  perfil: 'BUYER' | 'DRIVER';
+  setPerfil: (p: 'BUYER' | 'DRIVER') => void;
   login: (email: string, senha: string) => Promise<void>;
   register: (dados: any) => Promise<void>;
   logout: () => void;
@@ -24,6 +27,7 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]       = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [perfil, setPerfil]   = useState<'BUYER' | 'DRIVER'>('BUYER'); // ← dentro do provider
 
   useEffect(() => {
     async function loadSession() {
@@ -46,7 +50,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, senha: string) => {
     setLoading(true);
     try {
-      const { data } = await api.post('/api/v1/auth/login', { email, password: senha });
+      const credentials = { email, password: senha };
+      const { data } = await api.post('/api/v1/auth/login', credentials);
       await AsyncStorage.setItem('token', data.accessToken);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
       setUser(data.user);
@@ -60,11 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (dados: any) => {
     setLoading(true);
     try {
-      const { data } = await api.post('/api/v1/auth/register', {
-        email: dados.email,
-        name: dados.nome,
-        password: dados.senha,
-      });
+      const credentials = { email: dados.email, name: dados.nome, password: dados.senha };
+      const { data } = await api.post('/api/v1/auth/register', credentials);
       await AsyncStorage.setItem('token', data.accessToken);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
       setUser(data.user);
@@ -76,31 +78,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    try {
-      await api.post('/api/v1/auth/logout');
-    } catch {
-      // ignora erros no servidor
-    } finally {
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('user');
-      setUser(null);
-    }
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user');
+    setUser(null);
+    setPerfil('BUYER'); // reseta perfil ao sair
   }, []);
 
   const recoverPassword = useCallback(async (email: string) => {
     setLoading(true);
     try {
       await api.post('/api/v1/auth/forgot-password', { email });
-      return true;
-    } catch {
-      return false;
     } finally {
       setLoading(false);
     }
+    return true;
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, recoverPassword }}>
+    <AuthContext.Provider value={{ user, loading, perfil, setPerfil, login, register, logout, recoverPassword }}>
       {children}
     </AuthContext.Provider>
   );

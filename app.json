@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "rotalogMobile",
+    "slug": "rotalogmobile",
+    "version": "1.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "4b1af5d5-dd9f-4c7e-ad9a-36818744e474"
+      }
+    }
+  }
+}

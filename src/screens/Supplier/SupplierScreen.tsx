@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
 import { Button } from '../../components/ui/Button';
 import { Produto } from '../../data/mock';
@@ -62,12 +62,12 @@ export function SupplierScreen({ navigation, route, addToCart }: Props) {
       <TopBar title="" onBack={() => navigation.goBack()} transparent />
       <ScrollView contentContainerStyle={s.scroll}>
         {/* Hero */}
-        <View style={[s.hero, { backgroundColor: `${cor}11` }]}>
-          <Text style={{ fontSize: 64, marginBottom: 12 }}>{img}</Text>
-          <Text style={s.name}>{nome}</Text>
-          <Text style={s.cat}>{categoria}</Text>
+        <View style={[s.hero, { backgroundColor: `${f.cor}11` }]}>
+          <Text style={{ fontSize: 64, marginBottom: 12 }}>{f.img}</Text>
+          <Text style={s.name}>{f.nome}</Text>
+          <Text style={s.cat}>{f.categoria}</Text>
           <View style={s.stats}>
-            {([['Avaliação', nota], ['Entregas', entregas], ['Distância', distancia]] as [string, any][]).map(([k, v]) => (
+            {([['Avaliação', f.nota], ['Entregas', f.entregas], ['Distância', f.distancia]] as [string, any][]).map(([k, v]) => (
               <View key={k} style={{ alignItems: 'center' }}>
                 <Text style={s.statVal}>{v}</Text>
                 <Text style={s.statKey}>{k}</Text>

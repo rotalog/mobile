@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
 import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
@@ -139,10 +139,20 @@ export function HistoryScreen({ navigation }: { navigation: any }) {
                   )}
                 </View>
               </View>
-            );
-          }}
-        />
-      )}
+            </View>
+            <Text style={s.meta}>{p.fornecedor} · {p.data}</Text>
+            <Text style={s.itens}>{p.itens.join(' · ')}</Text>
+            <View style={s.footer}>
+              <Text style={s.total}>{p.total}</Text>
+              {p.status === 'entregue' && (
+                <TouchableOpacity style={s.repeatBtn}>
+                  <Text style={s.repeatTxt}>Repetir pedido</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+      />
     </View>
   );
 }

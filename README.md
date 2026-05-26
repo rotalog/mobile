@@ -1,67 +1,48 @@
-# RotaLog 🚚
+# RotaLog Mobile
 
-App de distribuição B2C — Fornecedores oferecem produtos (carnes, cimento, grãos etc.) e compradores realizam pedidos e acompanham a entrega.
-
----
+Aplicativo mobile do RotaLog para compradores, fornecedores e entregadores.
 
 ## Stack
 
-| Ferramenta | Motivo |
-|---|---|
-| **Expo (Managed Workflow)** | Setup rápido, sem config nativa |
-| **TypeScript** | Tipagem segura em todo o projeto |
-| **React Navigation v6** | Stack + Bottom Tabs |
-| **react-native-maps** | Mapa de acompanhamento de entrega |
-
----
-
-## Estrutura
-
-```
-src/
-├── theme/          → Cores, fontes, espaçamentos (design tokens)
-├── components/
-│   ├── ui/         → Button, Input, Badge, Avatar, Rating, Divider
-│   └── layout/     → TopBar
-├── screens/
-│   ├── Auth/       → Login, Recuperação, Cadastro
-│   ├── Home/       → Home com listagem de fornecedores
-│   └── AllScreens  → Catálogo, Carrinho, Histórico, Busca,
-│                     Entrega, Produto, Fornecedor, Config, Perfil
-├── hooks/
-│   ├── useCart.ts  → Lógica do carrinho (add, remove, qty, total)
-│   └── useAuth.ts  → Login, cadastro, logout, recuperação
-├── data/
-│   └── mock.ts     → Dados de exemplo (substituir por API)
-└── navigation/
-    └── AppNavigator.tsx → Stack Auth + Bottom Tab Navigator
-```
-
----
+- Expo 51 / React Native 0.74
+- TypeScript
+- React Navigation v6
+- Jest + Testing Library
+- Android e iOS nativos gerados para o runtime mobile
 
 ## Como rodar
 
 ```bash
-# 1. Clone / extraia o projeto
-cd RotaLog
-
-# 2. Instale as dependências
 npm install
-
-# 3. Inicie o servidor Expo
-npx expo start
-
-# 4. Escaneie o QR com o app Expo Go no celular
-#    ou pressione 'a' para Android / 'i' para iOS (simulador)
+npm start
 ```
 
----
+Com o Metro aberto, use:
 
-## Próximos passos
+```bash
+npm run android
+npm run ios
+npm run web
+```
 
-- [ ] Integrar API real (substituir `src/data/mock.ts`)
-- [ ] Autenticação com token JWT (`useAuth.ts`)
-- [ ] Mapa real com `react-native-maps` na tela de Entrega
-- [ ] Push notifications com `expo-notifications`
-- [ ] App do entregador (novo projeto ou flavor)
-- [ ] Pagamento in-app (Stripe / MercadoPago SDK)
+## Testes
+
+```bash
+npm test
+npx tsc --noEmit
+```
+
+## Estrutura
+
+```text
+src/
+  App.tsx
+  components/
+  context/
+  navigation/
+  screens/
+  services/
+  theme/
+```
+
+O arquivo `App.tsx` na raiz apenas reexporta `src/App.tsx`, mantendo o bootstrap nativo separado da aplicacao.

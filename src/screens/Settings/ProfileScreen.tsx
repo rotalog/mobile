@@ -11,6 +11,7 @@ import { ColorPalette, FontSize, Radius, Spacing } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 
+// ── Types ─────────────────────────────────────────────────────────────────────
 interface Endereco {
   id: number;
   label: string;
@@ -20,6 +21,7 @@ interface Endereco {
   principal: boolean;
 }
 
+// ── Screen ────────────────────────────────────────────────────────────────────
 export function ProfileScreen({ navigation }: { navigation: any }) {
   const { colors } = useTheme();
   const s = React.useMemo(() => createStyles(colors), [colors]);
@@ -213,6 +215,7 @@ export function ProfileScreen({ navigation }: { navigation: any }) {
 const createStyles = (colors: ColorPalette) => StyleSheet.create({
   container:         { flex: 1, backgroundColor: colors.bg },
   list:              { padding: Spacing.xl, gap: 10 },
+
   avatarWrap:        { alignItems: 'center', marginBottom: 8 },
   name:              { color: colors.text, fontWeight: '800', fontSize: FontSize.xl, marginTop: 12 },
   since:             { color: colors.muted, fontSize: FontSize.sm },

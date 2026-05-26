@@ -158,20 +158,23 @@ function MainNavigator() {
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 export function AppNavigator() {
-  const { user } = useAuth();
+  const { user, perfil } = useAuth();
+  
 
   return (
-    <NavigationContainer>
+   <NavigationContainer>
       <Root.Navigator screenOptions={{ headerShown: false }}>
-        {!user
-          ? <Root.Screen name="Auth" component={AuthNavigator} />
-          : <Root.Screen name="Main" component={MainNavigator} />
-        }
+        {!user ? (
+          <Root.Screen name="Auth" component={AuthNavigator} />
+        ) : perfil === 'DRIVER' ? (
+          <Root.Screen name="Driver" component={DriverNavigator} />
+        ) : (
+          <Root.Screen name="Main" component={MainNavigator} />
+        )}
       </Root.Navigator>
     </NavigationContainer>
   );
 }
-
 // ── Styles ────────────────────────────────────────────────────────────────────
 const createTabStyles = (colors: ColorPalette) => StyleSheet.create({
   bar:         { flexDirection: 'row', backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border, paddingBottom: 12, paddingTop: 8 },

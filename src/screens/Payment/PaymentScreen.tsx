@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useCart } from '../../context/CartContext';
 import { useDelivery } from '../../context/DeliveryContext';
 
+// ── Types ─────────────────────────────────────────────────────────────────────
 type PaymentMethod = 'pix' | 'boleto';
 type PaymentStatus = 'idle' | 'loading' | 'success';
 
@@ -15,15 +16,20 @@ const METHODS: { key: PaymentMethod; icon: string; label: string; sub: string }[
   { key: 'boleto', icon: '🧾', label: 'Boleto bancário', sub: 'Vence em 3 dias úteis' },
 ];
 
+// ── Component ─────────────────────────────────────────────────────────────────
 export function PaymentScreen({ navigation, route }: { navigation: any; route?: any }) {
   const { colors } = useTheme();
   const s = React.useMemo(() => createStyles(colors), [colors]);
   const total = route?.params?.total ?? 0;
   const orderId = route?.params?.orderId ?? `${Date.now()}`;
 
-  const [method, setMethod] = useState<PaymentMethod>('pix');
-  const [status, setStatus] = useState<PaymentStatus>('idle');
-  const [paymentData, setPaymentData] = useState<any>(null);
+  const { clearCart } = useCart();
+  const [method, setMethod]   = useState<PaymentMethod>('pix');
+  const [status, setStatus]   = useState<PaymentStatus>('idle');
+  const [codigo, setCodigo]   = useState('');
+  const pollingRef            = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollingIdRef          = useRef<string>(orderId);
+  const isSubmittingRef       = useRef(false);
 
   const totalFmt = `R$ ${total.toFixed(2).replace('.', ',')}`;
   const { cart, clearCart } = useCart();
@@ -61,10 +67,9 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
           <Text style={s.successTitle}>Pedido confirmado!</Text>
           <Text style={s.successSub}>
             {method === 'pix'
-              ? 'O código Pix foi gerado. Pague em até 30 minutos.'
-              : 'O boleto foi gerado. Pague em até 3 dias úteis.'}
+              ? 'Pagamento via Pix confirmado.'
+              : 'Boleto pago com sucesso.'}
           </Text>
-
           <View style={s.card}>
             <View style={s.detailRow}>
               <Text style={s.detailLabel}>Pedido</Text>
@@ -78,16 +83,7 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
               <Text style={s.detailLabel}>Método</Text>
               <Text style={s.detailValue}>{method === 'pix' ? 'Pix' : 'Boleto bancário'}</Text>
             </View>
-            {codigo !== '—' && (
-              <View style={s.codeBox}>
-                <Text style={s.codeLabel}>
-                  {method === 'pix' ? 'CHAVE PIX (COPIA E COLA)' : 'LINHA DIGITÁVEL'}
-                </Text>
-                <Text style={s.codeValue} selectable>{codigo}</Text>
-              </View>
-            )}
           </View>
-
           <Button
             label="VOLTAR AO INÍCIO"
             onPress={() => navigation.reset({ index: 0, routes: [{ name: 'HomeTab' }] })}
@@ -146,8 +142,8 @@ export function PaymentScreen({ navigation, route }: { navigation: any; route?: 
           </Text>
           <Text style={s.infoText}>
             {method === 'pix'
-              ? 'Após confirmar, você receberá um código copia e cola. O pagamento é aprovado em segundos e seu pedido entra em preparo imediatamente.'
-              : 'Após confirmar, o boleto será gerado. Pague em qualquer banco ou lotérica. A confirmação ocorre em até 3 dias úteis.'}
+              ? 'Após confirmar, você receberá um código copia e cola. O status é verificado automaticamente.'
+              : 'Após confirmar, o boleto será gerado. Pague em qualquer banco ou lotérica.'}
           </Text>
         </View>
       </ScrollView>

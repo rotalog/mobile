@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { TopBar } from '../../components/layout/TopBar';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
@@ -16,59 +16,11 @@ export function CatalogScreen({ navigation, addToCart }: Props) {
   const { colors } = useTheme();
   const s = React.useMemo(() => createStyles(colors), [colors]);
   const [busca, setBusca] = useState('');
-  const [cat, setCat]     = useState('Todos');
-  const [produtos, setProdutos] = useState<any[]>([]);
-  const [loading, setLoading]   = useState(true);
-
-  useEffect(() => {
-    async function loadProducts() {
-      try {
-        // Busca todos os fornecedores e agrega os produtos
-        const { data: suppliers } = await api.get('/api/v1/suppliers');
-        const supplierList = Array.isArray(suppliers) ? suppliers : suppliers.content ?? suppliers.suppliers ?? [];
-        const allProducts: any[] = [];
-        await Promise.all(
-          supplierList.slice(0, 10).map(async (s: any) => {
-            try {
-              const { data } = await api.get(`/api/v1/suppliers/${s.id}/products`);
-              const prods = Array.isArray(data) ? data : data.content ?? data.products ?? [];
-              prods.forEach((p: any) => {
-                allProducts.push({
-                  ...p,
-                  fornecedorNome: s.name ?? s.nome ?? '',
-                  supplierId: s.id,
-                });
-              });
-            } catch { /* ignora fornecedor sem produtos */ }
-          })
-        );
-        setProdutos(allProducts);
-      } catch {
-        setProdutos([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadProducts();
-  }, []);
-
-  const toCartItem = (p: any): Produto => ({
-    id: p.id,
-    nome: p.name ?? p.nome ?? '',
-    preco: p.price ?? p.preco ?? 0,
-    unidade: p.unit ?? p.unidade ?? 'un',
-    fornecedor: p.fornecedorNome ?? p.fornecedor ?? '',
-    img: p.img ?? '📦',
-    categoria: p.category ?? p.categoria ?? '',
-    estoque: (p.stockQuantity ?? p.quantity ?? 1) > 0,
-  });
-
-  const filtrados = produtos
-    .map(toCartItem)
-    .filter(p =>
-      (cat === 'Todos' || p.categoria === cat) &&
-      p.nome.toLowerCase().includes(busca.toLowerCase())
-    );
+  const [cat, setCat] = useState('Todos');
+  const filtrados = PRODUTOS.filter(p =>
+    (cat === 'Todos' || p.categoria === cat) &&
+    p.nome.toLowerCase().includes(busca.toLowerCase()),
+  );
 
   return (
     <View style={s.container}>
@@ -97,24 +49,13 @@ export function CatalogScreen({ navigation, addToCart }: Props) {
             <View style={s.center}>
               <Text style={{ color: colors.muted }}>Nenhum produto encontrado.</Text>
             </View>
-          }
-          renderItem={({ item: p }) => (
-            <TouchableOpacity style={s.card} onPress={() => navigation.navigate('Product', { produto: p })} activeOpacity={0.8}>
-              <View style={s.cardImg}><Text style={{ fontSize: 40 }}>{p.img}</Text></View>
-              <Text style={s.cardName} numberOfLines={2}>{p.nome}</Text>
-              <Text style={s.cardSup}>{p.fornecedor}</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2, marginBottom: 8 }}>
-                <Text style={s.cardPrice}>R$ {p.preco.toFixed(2)}</Text>
-                <Text style={s.cardUnit}>/{p.unidade}</Text>
-              </View>
-              {p.estoque
-                ? <Button label="+ Adicionar" onPress={() => addToCart(p)} sm full />
-                : <Button label="Indisponível" onPress={() => {}} sm full disabled />
-              }
-            </TouchableOpacity>
-          )}
-        />
-      )}
+            {p.estoque
+              ? <Button label="+ Adicionar" onPress={() => addToCart(p)} sm full />
+              : <Button label="Indisponível" onPress={() => {}} sm full disabled />
+            }
+          </TouchableOpacity>
+        )}
+      />
     </View>
   );
 }
