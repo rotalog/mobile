@@ -106,6 +106,17 @@ export function HistoryScreen({ navigation }: { navigation: any }) {
             const statusColor = statusTone ? colors[statusTone] : colors.muted;
             const statusIcon  = STATUS_ICON[status]  ?? (status === 'route' ? '>>' : '...');
             const statusLabel = STATUS_LABEL[status]  ?? status;
+return (
+              <TouchableOpacity style={s.cardPedido}>
+                {
+                <Text style={{ color: statusColor }}>{statusIcon} {statusLabel}</Text>
+                <Text>Pedido #{p.id}</Text>
+              </TouchableOpacity>
+            );
+          }} 
+        /> 
+      )} 
+    </View>
 
             // normaliza campos da API
             const id         = p.id ?? p.orderId ?? '-';
